@@ -57,6 +57,9 @@ jobs:
         env:
           POST_FOR_ME_API_KEY: ${{ secrets.POST_FOR_ME_API_KEY }}
           PFM_TIKTOK_ACCOUNT_ID: ${{ secrets.PFM_TIKTOK_ACCOUNT_ID }}
+          # Every video is also posted to Instagram (@poke.rpilot) as a Reel. Account ids aren't
+          # secret (they only work with the API key). Set the secret to override; set it to "none" to stop.
+          PFM_INSTAGRAM_ACCOUNT_ID: ${{ secrets.PFM_INSTAGRAM_ACCOUNT_ID || 'spc_kjp4NbyL89rCNXnxcjnkW' }}
           BRAND_HANDLE: ${{ secrets.BRAND_HANDLE }}
         run: |
           ARGS=""

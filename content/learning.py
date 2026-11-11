@@ -44,7 +44,7 @@ def normalize_metrics(m: dict | None) -> dict | None:
         "comments": _num(m.get("comment_count"), m.get("comments")),
         "shares": _num(m.get("share_count"), m.get("shares")),
         "saves": _num(m.get("favorites"), m.get("saved")),
-        "profile_views": _num(m.get("profile_views")),
+        "profile_views": _num(m.get("profile_views"), m.get("profile_visits")),
         "follows": _num(m.get("new_followers"), m.get("follows")),
         "link_clicks": _num(m.get("website_clicks")),
         "full_watch_rate": _num(m.get("full_video_watched_rate")),
@@ -153,29 +153,55 @@ def choose(history: dict, dimension: str, options: list[str], rng: random.Random
 # metrics sync
 # ---------------------------------------------------------------------------
 
-def sync_metrics(client, history: dict, account_id: str, max_pages: int = 10, log=print) -> int:
-    """Pull metrics for our posts from Post for Me and store them on history entries."""
+def _sum_metrics(parts: list[dict]) -> dict:
+    out: dict = {}
+    for m in parts:
+        for k, v in m.items():
+            if v is None or k in ("full_watch_rate", "avg_watch_s"):
+                continue
+            out[k] = (out.get(k) or 0.0) + v
+    return out
+
+
+def sync_metrics(client, history: dict, accounts: dict[str, str] | str, max_pages: int = 10, log=print) -> int:
+    """Pull metrics for our posts from every platform account ({"tiktok": id, "instagram": id})
+    and store them per platform plus a combined total (what the learner scores)."""
+    if isinstance(accounts, str):
+        accounts = {"tiktok": accounts}
     by_post = {e["post_id"]: e for e in history.get("posts", []) if e.get("post_id")}
     if not by_post:
         return 0
-    updated = 0
+    touched = set()
     now = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
-    for item in client.feed(account_id, max_pages=max_pages):
-        e = by_post.get(item.get("social_post_id"))
-        if not e:
+    for platform, account_id in accounts.items():
+        if not account_id:
             continue
-        m = normalize_metrics(item.get("metrics"))
-        if m:
-            e["metrics"] = m
+        try:
+            items = list(client.feed(account_id, max_pages=max_pages))
+        except Exception as ex:  # one platform failing must not block the other
+            log(f"  {platform} metrics skipped: {ex}")
+            continue
+        for item in items:
+            e = by_post.get(item.get("social_post_id"))
+            if not e:
+                continue
+            m = normalize_metrics(item.get("metrics"))
+            if m:
+                e.setdefault("metrics_by_platform", {})[platform] = m
+                touched.add(id(e))
+            if item.get("platform_url"):
+                e.setdefault("urls", {})[platform] = item["platform_url"]
+                if not e.get("url"):
+                    e["url"] = item["platform_url"]
+            if e.get("status") == "processing":
+                e["status"] = "posted"
+    for e in by_post.values():
+        if id(e) in touched:
+            e["metrics"] = _sum_metrics(list(e["metrics_by_platform"].values()))
             e["metrics_at"] = now
-            e["club_score"] = round(club_score(m) or 0.0, 2)
-            updated += 1
-        if item.get("platform_url") and not e.get("url"):
-            e["url"] = item["platform_url"]
-        if e.get("status") == "processing":
-            e["status"] = "posted"
-    log(f"  metrics updated for {updated} post(s)")
-    return updated
+            e["club_score"] = round(club_score(e["metrics"]) or 0.0, 2)
+    log(f"  metrics updated for {len(touched)} post(s)")
+    return len(touched)
 
 
 # ---------------------------------------------------------------------------
@@ -199,7 +225,7 @@ def report(history: dict, now: datetime | None = None) -> str:
              + ("" if len(mature) >= MIN_MATURE_TO_LEARN else
                 f" (starts after {MIN_MATURE_TO_LEARN} judged videos)"), "",
              "Club-intent score = 0.02 x views + likes + 4 x comments + 6 x shares + 3 x saves"
-             " + 5 x profile views + 15 x follows + 25 x link clicks.", ""]
+             " + 5 x profile views + 15 x follows + 25 x link clicks (TikTok + Instagram combined).", ""]
     if mature:
         for dim, title in DIMENSIONS:
             stats = arm_stats(history, dim, now)

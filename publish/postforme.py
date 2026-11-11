@@ -43,6 +43,10 @@ TIKTOK_CONFIG = {
 }
 
 
+# Instagram: post as a Reel and also show it on the profile grid/feed.
+INSTAGRAM_CONFIG = {"placement": "reels", "share_to_feed": True}
+
+
 class PostForMeError(RuntimeError):
     def __init__(self, msg: str, status: int | None = None, retryable: bool = False):
         super().__init__(msg)
@@ -134,13 +138,14 @@ class PostForMe:
             raise PostForMeError(f"PUT upload -> HTTP {e.code}: {detail}", e.code,
                                  e.code in (408, 429) or e.code >= 500) from e
 
-    def create_post(self, caption: str, account_id: str, media_url: str, external_id: str) -> dict:
+    def create_post(self, caption: str, account_ids: list[str], media_url: str, external_id: str) -> dict:
         body = {
             "caption": caption,
-            "social_accounts": [account_id],
+            "social_accounts": list(account_ids),
             "media": [{"url": media_url}],
-            # Set for both TikTok account types; only the one matching the account applies.
-            "platform_configurations": {"tiktok": TIKTOK_CONFIG, "tiktok_business": TIKTOK_CONFIG},
+            # Per-platform options; each only applies to accounts on that platform.
+            "platform_configurations": {"tiktok": TIKTOK_CONFIG, "tiktok_business": TIKTOK_CONFIG,
+                                        "instagram": INSTAGRAM_CONFIG},
             "external_id": external_id,
         }
         return self.request("POST", "/v1/social-posts", body=body)
@@ -183,11 +188,11 @@ class PostForMe:
             return u["media_url"]
         return with_retries(attempt, "media upload", log=log)
 
-    def publish(self, caption: str, account_id: str, media_url: str, external_id: str, log=print) -> dict:
+    def publish(self, caption: str, account_ids: list[str], media_url: str, external_id: str, log=print) -> dict:
         """Create the post, retrying safely: before a retry, check whether the earlier
         attempt actually created it (same external_id) so we never double-post."""
         return with_retries(
-            lambda: self.create_post(caption, account_id, media_url, external_id),
+            lambda: self.create_post(caption, account_ids, media_url, external_id),
             "create post", log=log,
             before_retry=lambda: self._safe_find(external_id),
         )
@@ -198,27 +203,30 @@ class PostForMe:
         except Exception:
             return None
 
-    def wait_for_result(self, post_id: str, account_id: str | None = None, timeout_s: float = 900,
-                        interval_s: float | None = None, log=print) -> dict:
-        """Poll until the platform result appears. Returns
-        {"state": "posted"|"failed"|"timeout", "url", "platform_id", "error", "post_status"}."""
+    def wait_for_results(self, post_id: str, account_ids: list[str], timeout_s: float = 900,
+                         interval_s: float | None = None, log=print) -> dict[str, dict]:
+        """Poll until every account has a platform result (or timeout). Returns
+        {account_id: {"state": "posted"|"failed"|"timeout", "url", "platform_id", "error"}}."""
         interval_s = interval_s or float(os.environ.get("PFM_POLL_SECONDS", "15"))
         deadline = time.time() + timeout_s
-        status = None
+        done: dict[str, dict] = {}
         while True:
             try:
-                results = self.get_results(post_id)
-                mine = [r for r in results if not account_id or r.get("social_account_id") == account_id] or results
-                if mine:
-                    r = mine[0]
+                for r in self.get_results(post_id):
+                    acct = r.get("social_account_id")
+                    if acct not in account_ids or acct in done:
+                        continue
                     pd = r.get("platform_data") or {}
                     if r.get("success"):
-                        return {"state": "posted", "url": pd.get("url"), "platform_id": pd.get("id"),
-                                "error": None, "post_status": "processed"}
-                    return {"state": "failed", "url": None, "platform_id": None,
-                            "error": json.dumps(r.get("error"))[:1000], "post_status": "processed"}
+                        done[acct] = {"state": "posted", "url": pd.get("url"), "platform_id": pd.get("id"),
+                                      "error": None}
+                    else:
+                        done[acct] = {"state": "failed", "url": None, "platform_id": None,
+                                      "error": json.dumps(r.get("error"))[:1000]}
+                if len(done) == len(account_ids):
+                    return done
                 status = self.get_post(post_id).get("status")
-                log(f"  post {post_id}: status={status}, waiting for TikTok result...")
+                log(f"  post {post_id}: status={status}, {len(done)}/{len(account_ids)} platform results in...")
             except PostForMeError as e:
                 if not e.retryable:
                     raise
@@ -226,6 +234,7 @@ class PostForMe:
             except (urllib.error.URLError, TimeoutError, OSError) as e:
                 log(f"  poll network error (will keep trying): {e}")
             if time.time() >= deadline:
-                return {"state": "timeout", "url": None, "platform_id": None, "error": None,
-                        "post_status": status}
+                for a in account_ids:
+                    done.setdefault(a, {"state": "timeout", "url": None, "platform_id": None, "error": None})
+                return done
             time.sleep(interval_s)

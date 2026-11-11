@@ -5,7 +5,12 @@ Fully automatic poker strategy videos for TikTok. Every day at about 12:30 PM an
 1. picks the next piece of content (it alternates hand breakdowns and quizzes, never repeats),
 2. renders a 1080x1920 MP4 entirely with code (Python + Pillow + ffmpeg, no AI or paid tools),
 3. uploads it to your TikTok through the [Post for Me](https://api.postforme.dev) API,
-4. waits until TikTok confirms the post, and records it in `state/history.json`.
+4. posts the same video to **Instagram** (@poke.rpilot) as a Reel shared to the feed, with the same caption,
+5. waits until both platforms confirm, and records each result in `state/history.json`.
+
+Instagram uses Post for Me account `spc_kjp4NbyL89rCNXnxcjnkW` by default (set in `.github/workflows/post.yml`).
+To use a different Instagram account, add a `PFM_INSTAGRAM_ACCOUNT_ID` secret; set it to `none` to post to TikTok only.
+If Instagram rejects a video but TikTok accepts it, the run fails (so GitHub emails you) but the video counts as posted.
 
 Every video ends with: **"Want to play? Play for chips with the link in my bio"**, your @handle, and "Practice these spots with real players."
 
@@ -43,7 +48,7 @@ It costs nothing to run besides your Post for Me plan. GitHub Actions is free fo
 
 The goal is club sign-ups, so every run:
 
-1. **Pulls TikTok results** for past videos from Post for Me (views, likes, comments, shares;
+1. **Pulls TikTok and Instagram results** for past videos from Post for Me (views, likes, comments, shares;
    with a TikTok **Business** account also profile views, new followers and link clicks).
 2. **Scores each video for "club intent"** once it's 48 hours old:
    `0.02 x views + likes + 4 x comments + 6 x shares + 3 x saves + 5 x profile views + 15 x follows + 25 x link clicks`.

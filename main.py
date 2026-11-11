@@ -68,24 +68,45 @@ def check_video(info: dict) -> list[str]:
     return errs
 
 
-def reconcile_pending(client: PostForMe, history: dict, account_id: str | None) -> bool:
+def overall_status(platforms: dict[str, dict]) -> str:
+    states = [p["state"] for p in platforms.values()]
+    if any(s == "posted" for s in states):
+        return "posted"          # live somewhere: never repost this content
+    if any(s == "timeout" for s in states):
+        return "processing"
+    return "failed"
+
+
+def apply_results(entry: dict, accounts: dict[str, str], results: dict[str, dict]) -> None:
+    plats = entry.setdefault("platforms", {})
+    for platform, acct in accounts.items():
+        if acct in results:
+            plats[platform] = results[acct]
+    entry["status"] = overall_status(plats)
+    first = next((p["url"] for p in plats.values() if p.get("url")), None)
+    entry["url"] = (plats.get("tiktok") or {}).get("url") or first
+    entry["error"] = "; ".join(f"{k}: {v['error']}" for k, v in plats.items() if v.get("error")) or None
+    entry["updated_at"] = now_iso()
+
+
+def reconcile_pending(client: PostForMe, history: dict, accounts: dict[str, str]) -> bool:
     """Update entries left 'processing' by an earlier run that timed out while polling."""
     changed = False
     for e in history["posts"]:
         if e.get("status") != "processing" or not e.get("post_id"):
             continue
+        pending = {p: a for p, a in accounts.items()
+                   if (e.get("platforms") or {}).get(p, {}).get("state", "timeout") == "timeout"}
         try:
-            res = client.wait_for_result(e["post_id"], account_id, timeout_s=0, log=log)
+            res = client.wait_for_results(e["post_id"], list(pending.values()), timeout_s=0, log=log)
         except PostForMeError as ex:
             log(f"  could not reconcile {e['post_id']}: {ex}")
             continue
-        if res["state"] in ("posted", "failed"):
-            e["status"] = res["state"]
-            e["url"] = res["url"]
-            e["error"] = res["error"]
-            e["updated_at"] = now_iso()
+        before = e.get("status")
+        apply_results(e, pending, res)
+        if e["status"] != before:
             changed = True
-            log(f"  reconciled {e['id']} -> {res['state']}")
+            log(f"  reconciled {e['id']} -> {e['status']}")
     return changed
 
 
@@ -105,9 +126,9 @@ def choose_variants(item: dict, history: dict, index: int, rng: random.Random) -
     return {"tag": tag, "cta": cta}
 
 
-def sync_and_report(client: PostForMe, history: dict, account_id: str) -> None:
+def sync_and_report(client: PostForMe, history: dict, accounts: dict[str, str]) -> None:
     try:
-        learning.sync_metrics(client, history, account_id, log=log)
+        learning.sync_metrics(client, history, accounts, log=log)
     except Exception as e:  # metrics must never block posting
         log(f"  metrics sync skipped: {e}")
     save_history(history)
@@ -127,6 +148,11 @@ def main(argv=None) -> int:
     handle = os.environ.get("BRAND_HANDLE", "").strip() or None
     api_key = os.environ.get("POST_FOR_ME_API_KEY", "").strip()
     account_id = os.environ.get("PFM_TIKTOK_ACCOUNT_ID", "").strip()
+    ig_account_id = os.environ.get("PFM_INSTAGRAM_ACCOUNT_ID", "").strip()
+    # Every video goes to TikTok, and to Instagram too when an Instagram account id is set.
+    accounts = {"tiktok": account_id}
+    if ig_account_id and ig_account_id.lower() != "none":
+        accounts["instagram"] = ig_account_id
 
     if (not args.dry_run or args.report_only) and (not api_key or not account_id):
         gh_error("POST_FOR_ME_API_KEY and PFM_TIKTOK_ACCOUNT_ID must be set (or use --dry-run).")
@@ -136,11 +162,11 @@ def main(argv=None) -> int:
     client = PostForMe(api_key) if not args.dry_run else None
     if args.report_only:
         client = PostForMe(api_key)
-    if client and reconcile_pending(client, history, account_id):
+    if client and reconcile_pending(client, history, accounts):
         save_history(history)
     if client:
-        log("Syncing TikTok metrics...")
-        sync_and_report(client, history, account_id)
+        log(f"Syncing metrics ({', '.join(accounts)})...")
+        sync_and_report(client, history, accounts)
         if args.report_only:
             log(f"Wrote {REPORT_PATH}")
             return 0
@@ -193,11 +219,11 @@ def main(argv=None) -> int:
     try:
         log("Uploading media to Post for Me...")
         media_url = client.upload_media(mp4, log=log)
-        log("Creating TikTok post...")
-        post = client.publish(caption, account_id, media_url, external_id, log=log)
+        log(f"Creating post for {' + '.join(accounts)}...")
+        post = client.publish(caption, list(accounts.values()), media_url, external_id, log=log)
         entry["post_id"] = post.get("id")
         log(f"  post id {entry['post_id']} (status {post.get('status')})")
-        res = client.wait_for_result(entry["post_id"], account_id, log=log)
+        res = client.wait_for_results(entry["post_id"], list(accounts.values()), log=log)
     except PostForMeError as e:
         entry.update(status="failed", error=str(e)[:1000], posted_at=None)
         history["posts"].append(entry)
@@ -205,26 +231,23 @@ def main(argv=None) -> int:
         gh_error(f"Posting failed after retries: {e}")
         return 1
 
-    entry["updated_at"] = now_iso()
-    if res["state"] == "posted":
-        entry.update(status="posted", posted_at=now_iso(), url=res["url"], platform_id=res["platform_id"])
-        history["posts"].append(entry)
-        save_history(history)
-        log(f"Posted! {res['url'] or ''}")
-        return 0
-    if res["state"] == "timeout":
-        # The post exists and is still processing. Count it as used (never double-post);
-        # the next run re-checks it and frees the content if TikTok rejected it.
-        entry.update(status="processing", posted_at=now_iso())
-        history["posts"].append(entry)
-        save_history(history)
-        print(f"::warning::Post {entry['post_id']} still processing after polling; will re-check next run.")
-        return 0
-    entry.update(status="failed", error=res["error"])
+    apply_results(entry, accounts, res)
+    if entry["status"] in ("posted", "processing"):
+        entry["posted_at"] = now_iso()
     history["posts"].append(entry)
     save_history(history)
-    gh_error(f"TikTok rejected post {entry['post_id']}: {res['error']}")
-    return 1
+    for platform, r in entry["platforms"].items():
+        log(f"  {platform}: {r['state']} {r.get('url') or ''}")
+    failed = [p for p, r in entry["platforms"].items() if r["state"] == "failed"]
+    waiting = [p for p, r in entry["platforms"].items() if r["state"] == "timeout"]
+    if failed:
+        # Loud failure (GitHub emails you). Content that went live on any platform stays used.
+        gh_error(f"Post {entry['post_id']} failed on {', '.join(failed)}: {entry.get('error')}")
+        return 1
+    if waiting:
+        print(f"::warning::Post {entry['post_id']} still processing on {', '.join(waiting)}; "
+              f"will re-check next run.")
+    return 0
 
 
 if __name__ == "__main__":
