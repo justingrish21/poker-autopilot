@@ -7,7 +7,7 @@ Fully automatic poker strategy videos for TikTok. Every day at about 12:30 PM an
 3. uploads it to your TikTok through the [Post for Me](https://api.postforme.dev) API,
 4. waits until TikTok confirms the post, and records it in `state/history.json`.
 
-Every video ends with: **"Want to play? Free play-money poker club / Link in bio"**.
+Every video ends with: **"Want to play? Play for chips with the link in my bio"**, your @handle, and "Practice these spots with real players."
 
 It costs nothing to run besides your Post for Me plan. GitHub Actions is free for this.
 
@@ -22,7 +22,7 @@ It costs nothing to run besides your Post for Me plan. GitHub Actions is free fo
 
 * Dark background, green felt table, real-looking cards, big outlined text.
 * Everything important stays inside TikTok's safe zone: nothing in the top 150 px, the bottom 350 px or the right 140 px.
-* Built for engagement: punchy hooks, "comment your answer" prompts, a countdown, reveal effects, and a rotating end-card teaser ("Think you'd play it better? Prove it at the tables.").
+* Built for engagement: punchy hooks, "comment your answer" prompts, a countdown and reveal effects.
 * Never mentions real money, deposits, rakeback or payouts, in the video or the caption. Every item and caption runs through a compliance check before posting, so the account reads as a poker strategy/education page.
 
 ## Content never runs out
@@ -49,7 +49,6 @@ The goal is club sign-ups, so every run:
    * **Format:** breakdown vs quiz. It never posts the same format 3 times in a row.
    * **Content type:** pot odds, outs, equity, combos, call-or-fold draws. This kicks in once the starter library is used up.
    * **Hook tag** on the opening screen ("POKER QUIZ", "WHAT WOULD YOU DO?"...).
-   * **End-card teaser** ("Think you'd play it better? Prove it at the tables."...).
    * **Caption call-to-action.**
 4. **Writes `state/performance.md`:** a plain-English report of what's winning, plus the top and weakest videos with links.
    Open it on GitHub any time.

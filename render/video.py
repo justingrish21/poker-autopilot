@@ -245,13 +245,8 @@ def with_table(cy, tw, th, darken: float = 0.0) -> Image.Image:
 
 BREAKDOWN_TAGS = ["HAND BREAKDOWN", "WHAT WOULD YOU DO?", "STRATEGY BREAKDOWN", "REAL SPOT"]
 QUIZ_TAGS = ["POKER QUIZ", "QUICK QUIZ", "TEST YOUR GAME", "PRO LEVEL QUIZ"]
-END_TEASERS = [
-    "Think you'd play it better? Prove it at the tables.",
-    "Stop watching. Start playing.",
-    "Practice these spots with real players. Zero risk.",
-    "Your seat is waiting. Bring your friends.",
-    "Learn it here. Play it tonight.",
-]
+END_CTA = "Play for chips with the link in my bio"
+END_LINE = "Practice these spots with real players."
 
 
 def pick(seq, item, salt=""):
@@ -272,23 +267,21 @@ def hook_scene(tl: Timeline, tag: str, hook: str, hero: list[str], t_end: float)
                       "slide", dur=0.45, slide=(0, 260)))
 
 
-def end_scene(tl: Timeline, t0: float, handle: str | None, teaser: str = END_TEASERS[0]):
+def end_scene(tl: Timeline, t0: float, handle: str | None):
     tl.scene(t0, D.background())
     for i, (c, ang) in enumerate(zip(("As", "Kh"), (-10, 10))):
         img = D.card_face(c, 130).rotate(-ang, resample=Image.BICUBIC, expand=True)
         tl.add(El(img, CX + (i - 0.5) * 110, 345 + abs(ang), t0 + 0.05 + 0.1 * i, None, "pop"))
     tl.add(El(D.text_sprite("Want to play?", 104, WHITE, "black", max_lines=2), CX, 600, t0 + 0.15, None, "pop"))
-    tl.add(El(D.text_sprite("Free play-money poker club", 66, GOLD, "bold", max_lines=2), CX, 760,
-              t0 + 0.45, None, "fade", slide=(0, 30)))
-    tl.add(El(D.up_arrow(120, 150), CX, 965, t0 + 0.8, None, "pop", bob=16))
-    tl.add(El(D.text_sprite("Link in bio", 96, WHITE, "black"), CX, 1125, t0 + 0.9, None, "pulse",
-              pulse_amp=0.04, pulse_hz=1.2))
-    y = 1265
+    tl.add(El(D.text_sprite(END_CTA, 80, GOLD, "black", max_lines=2, line_spacing=1.05), CX, 800,
+              t0 + 0.45, None, "pulse", pulse_amp=0.03, pulse_hz=1.2))
+    tl.add(El(D.up_arrow(120, 150), CX, 1010, t0 + 0.8, None, "pop", bob=16))
+    y = 1160
     if handle:
         h = handle if handle.startswith("@") else "@" + handle
-        tl.add(El(D.text_sprite(h, 50, MUTED, "semibold", max_lines=1), CX, y, t0 + 1.2, None, "fade"))
-        y += 85
-    tl.add(El(D.text_sprite(teaser, 44, GOLD, "bold", max_lines=2), CX, y + 10, t0 + 1.4, None, "pop"))
+        tl.add(El(D.text_sprite(h, 52, MUTED, "semibold", max_lines=1), CX, y, t0 + 1.1, None, "fade"))
+        y += 90
+    tl.add(El(D.text_sprite(END_LINE, 46, WHITE, "bold", max_lines=1), CX, y, t0 + 1.3, None, "pop"))
 
 
 def play_color(play: str):
@@ -442,7 +435,7 @@ def build_breakdown(item: dict, handle: str | None) -> Timeline:
         for c, x in zip(cards, xs):
             if c:
                 tl.add(El(D.card_face(c, mini), x, 1455, 11.8, t_end, "fade"))
-    end_scene(tl, t_end, handle, item.get("teaser") or pick(END_TEASERS, item, "end"))
+    end_scene(tl, t_end, handle)
     tl.add(progress_bar(T))
     return tl
 
@@ -521,7 +514,7 @@ def build_quiz(item: dict, handle: str | None) -> Timeline:
     tl.add(El(D.text_sprite(item["explain"], 50, WHITE, "bold", max_w=D.SAFE_W - 70, max_lines=5),
               CX, 800, 10.4, t_end, "fade", slide=(0, 20)))
     tl.add(confetti(10.0, CX, correct_y, seed=int(item["hash"][:8], 16), n=44, half_width=D.SAFE_W / 2 - 20))
-    end_scene(tl, t_end, handle, item.get("teaser") or pick(END_TEASERS, item, "end"))
+    end_scene(tl, t_end, handle)
     tl.add(progress_bar(T))
     return tl
 

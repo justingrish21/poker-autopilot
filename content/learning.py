@@ -8,8 +8,7 @@ How it works
    (shares, comments, follows, profile views, link clicks) weigh far more than views or likes.
 3. Posts are only judged once they're MATURE_HOURS old, and scores are turned into
    percentile ranks so the learner doesn't care about absolute numbers.
-4. For each choice the system makes (format, content kind, hook tag, end-card teaser,
-   caption CTA) it runs Thompson sampling: options that scored well get picked more,
+4. For each choice the system makes (format, content kind, hook tag, caption CTA) it runs Thompson sampling: options that scored well get picked more,
    untested ones still get tried, and nothing is ever fully abandoned.
 """
 from __future__ import annotations
@@ -184,7 +183,7 @@ def sync_metrics(client, history: dict, account_id: str, max_pages: int = 10, lo
 # ---------------------------------------------------------------------------
 
 DIMENSIONS = [("format", "Format"), ("kind", "Content type"), ("tag", "Hook tag"),
-              ("teaser", "End-card teaser"), ("cta", "Caption CTA"), ("slot", "Time slot"),
+              ("cta", "Caption CTA"), ("slot", "Time slot"),
               ("music", "Music")]
 
 

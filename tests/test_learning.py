@@ -100,4 +100,4 @@ def test_sync_metrics_and_report():
     assert n == 1 and e["metrics"]["views"] == 1234 and e["status"] == "posted"
     assert e["url"].endswith("/video/1") and e["club_score"] > 0
     md = learning.report(h, NOW)
-    assert "Performance report" in md and "Stop limping" in md and "End-card teaser" in md
+    assert "Performance report" in md and "Stop limping" in md and "Content type" in md

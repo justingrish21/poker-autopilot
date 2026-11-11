@@ -23,7 +23,7 @@ from content.rotation import (HISTORY_PATH, USED_STATUSES, find_item, history_en
                               next_item, now_iso, save_history)
 from publish.captions import build_caption, cta_options
 from publish.postforme import PostForMe, PostForMeError
-from render.video import BREAKDOWN_TAGS, END_TEASERS, QUIZ_TAGS, pick, render_item
+from render.video import BREAKDOWN_TAGS, QUIZ_TAGS, pick, render_item
 
 ROOT = Path(__file__).resolve().parent
 OUT_DIR = ROOT / "out"
@@ -96,14 +96,13 @@ def time_slot(now: datetime | None = None) -> str:
 
 
 def choose_variants(item: dict, history: dict, index: int, rng: random.Random) -> dict:
-    """Pick the hook tag, end-card teaser and caption CTA: learned from results once
+    """Pick the hook tag and caption CTA: learned from results once
     there's enough data, otherwise a deterministic rotation."""
     tags = BREAKDOWN_TAGS if item["format"] == "breakdown" else QUIZ_TAGS
     ctas = cta_options(item["format"])
     tag = learning.choose(history, "tag", tags, rng) or pick(tags, item)
-    teaser = learning.choose(history, "teaser", END_TEASERS, rng) or pick(END_TEASERS, item, "end")
     cta = learning.choose(history, "cta", ctas, rng) or ctas[index % len(ctas)]
-    return {"tag": tag, "teaser": teaser, "cta": cta}
+    return {"tag": tag, "cta": cta}
 
 
 def sync_and_report(client: PostForMe, history: dict, account_id: str) -> None:
@@ -154,11 +153,11 @@ def main(argv=None) -> int:
         return 3
     index = sum(1 for p in history["posts"] if p.get("status") in USED_STATUSES)
     variants = choose_variants(item, history, index, rng)
-    item["tag"], item["teaser"] = variants["tag"], variants["teaser"]
+    item["tag"] = variants["tag"]
     caption = build_caption(item, index, cta=variants["cta"])
     log(f"Item: {item['id']} ({item['format']}, {item.get('kind', 'library')}) hash={item['hash']}")
     log(f"  learning {'ON' if learning.learning_active(history) else 'warming up'}: tag={variants['tag']!r} "
-        f"teaser={variants['teaser']!r}")
+        f"cta={variants['cta']!r}")
 
     OUT_DIR.mkdir(exist_ok=True)
     mp4 = OUT_DIR / f"{item['id']}.mp4"
@@ -184,7 +183,7 @@ def main(argv=None) -> int:
     entry = history_entry(item, external_id=external_id, music=meta["music"])
     entry["features"] = {
         "format": item["format"], "kind": item.get("kind", "library"), "tag": variants["tag"],
-        "teaser": variants["teaser"], "cta": variants["cta"], "slot": time_slot(),
+        "cta": variants["cta"], "slot": time_slot(),
         "music": "beat" if meta["music"] else "silent", "hook": item.get("hook"),
     }
     try:
