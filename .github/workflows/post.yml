@@ -1,0 +1,87 @@
+name: Post to TikTok
+
+on:
+  schedule:
+    # GitHub cron is always UTC. Detroit runs on Eastern Time:
+    #   "30 17 * * *" = 12:30 PM EST     "30 0 * * *" = 7:30 PM EST
+    # These are correct for Eastern STANDARD Time (UTC-5, early November to mid-March).
+    # During daylight saving time (EDT, UTC-4) the same crons fire one hour later:
+    # 1:30 PM and 8:30 PM Detroit time. GitHub may also start scheduled runs a few minutes late.
+    - cron: "30 17 * * *"
+    - cron: "30 0 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run: render the video and caption, but don't post"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+# Never let two runs overlap (they'd pick the same content).
+concurrency:
+  group: poker-autopilot-post
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'true' || 'false' }}
+      MUSIC_GAIN_DB: ${{ vars.MUSIC_GAIN_DB || '-18' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install ffmpeg
+        run: sudo apt-get update -q && sudo apt-get install -y -q ffmpeg
+
+      - name: Install Python packages
+        run: pip install -r requirements.txt
+
+      - name: Render and post
+        env:
+          POST_FOR_ME_API_KEY: ${{ secrets.POST_FOR_ME_API_KEY }}
+          PFM_TIKTOK_ACCOUNT_ID: ${{ secrets.PFM_TIKTOK_ACCOUNT_ID }}
+          BRAND_HANDLE: ${{ secrets.BRAND_HANDLE }}
+        run: |
+          if [ "$DRY_RUN" = "true" ]; then
+            python main.py --dry-run
+          else
+            python main.py
+          fi
+
+      - name: Upload rendered video
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-${{ github.run_number }}
+          path: |
+            out/*.mp4
+            out/*.txt
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Save post history
+        if: always() && env.DRY_RUN != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state/history.json
+          if git diff --cached --quiet; then
+            echo "No history changes."
+            exit 0
+          fi
+          git commit -m "Update post history"
+          for i in 1 2 3; do
+            git pull --rebase origin "$GITHUB_REF_NAME" && git push origin "HEAD:$GITHUB_REF_NAME" && exit 0
+            sleep $((i * 5))
+          done
+          echo "::error::Could not push state/history.json"
+          exit 1
