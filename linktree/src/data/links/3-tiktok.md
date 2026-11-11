@@ -1,5 +1,5 @@
 ---
-order: 2
+order: 3
 title: New hands every day on TikTok
 emoji: 🎬
 href: https://www.tiktok.com/@pokerpilot
