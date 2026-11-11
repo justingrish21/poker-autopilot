@@ -198,7 +198,7 @@ def main(argv=None) -> int:
     meta = render_item(item, mp4, handle, music=not args.no_music)
     info = probe(mp4)
     log(f"  {mp4.name}: {info['width']}x{info['height']} @ {info['fps']:.0f}fps, {info['duration']:.2f}s, "
-        f"{info['vcodec']}/{info['pix_fmt']} + {info['audio']}, music={meta['music'] or 'silent'}, "
+        f"{info['vcodec']}/{info['pix_fmt']} + {info['audio']}, music={meta['music'] or 'generated beat'}, "
         f"{mp4.stat().st_size / 1e6:.1f} MB")
     bad = check_video(info)
     if bad:
@@ -217,7 +217,7 @@ def main(argv=None) -> int:
     entry["features"] = {
         "format": item["format"], "kind": item.get("kind", "library"), "tag": variants["tag"],
         "cta": variants["cta"], "slot": time_slot(),
-        "music": "beat" if meta["music"] else "silent", "hook": item.get("hook"),
+        "music": "your beat" if meta["music"] else "generated beat", "hook": item.get("hook"),
     }
     try:
         log("Uploading media to Post for Me...")

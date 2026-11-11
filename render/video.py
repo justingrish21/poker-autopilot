@@ -14,6 +14,8 @@ from . import draw as D
 from .draw import CX, GOLD, GREEN, H, MUTED, RED, BLUE, W, WHITE
 
 FPS = 30
+# Match the loudness of typical short-form videos (about -15 LUFS), peaks under -1.5 dBTP.
+LOUDNORM = "loudnorm=I=-15:TP=-1.5:LRA=11,aresample=44100"
 ROOT = Path(__file__).resolve().parent.parent
 MUSIC_DIR = ROOT / "music"
 AUDIO_EXTS = {".mp3", ".wav"}
@@ -138,12 +140,20 @@ class Timeline:
         self.xfade = 0.35
         self.flashes: list[tuple[float, float, float]] = []
         self.shakes: list[tuple[float, float, float]] = []
+        self.sounds: list[tuple[float, str, float]] = []   # (time, sound effect, gain)
+
+    def sound(self, t: float, name: str, gain: float = 1.0):
+        self.sounds.append((t, name, gain))
 
     def scene(self, t0: float, base: Image.Image):
         self.scenes.append((t0, base))
 
     def add(self, layer):
         self.layers.append(layer)
+        if isinstance(layer, El):  # every animated element gets a matching sound
+            snd = {"flip": "flip", "slide": "swish", "pop": "pop", "pulse": "pop"}.get(layer.anim)
+            if snd:
+                self.sound(layer.t0 + (0.12 if layer.anim == "flip" else 0.0), snd, 0.8)
         return layer
 
     def base_at(self, t):
@@ -177,6 +187,7 @@ class Timeline:
             self.flashes.append((t0, 0.18, flash))
         if shake:
             self.shakes.append((t0, 0.3, shake))
+        self.sound(t0, "impact" if flash else "whoosh", 1.0 if flash else 0.8)
 
 
 def confetti(t0: float, cx: float, cy: float, seed: int, n: int = 46, dur: float = 2.2, spread: float = 1.0,
@@ -269,6 +280,8 @@ def hook_scene(tl: Timeline, tag: str, hook: str, hero: list[str], t_end: float)
 
 def end_scene(tl: Timeline, t0: float, handle: str | None):
     tl.scene(t0, D.background())
+    tl.sound(t0, "whoosh")
+    tl.sound(t0 + 0.5, "chips", 0.8)
     for i, (c, ang) in enumerate(zip(("As", "Kh"), (-10, 10))):
         img = D.card_face(c, 130).rotate(-ang, resample=Image.BICUBIC, expand=True)
         tl.add(El(img, CX + (i - 0.5) * 110, 345 + abs(ang), t0 + 0.05 + 0.1 * i, None, "pop"))
@@ -413,6 +426,8 @@ def build_breakdown(item: dict, handle: str | None) -> Timeline:
     tl.add(El(bn, CX, 430, 11.3, t_end, "pop", dur=0.5))
     tl.punch(11.3, flash=0.3, shake=14)
     tl.add(confetti(11.3, CX, 430, seed=int(item["hash"][:8], 16), n=36, half_width=bn.width / 2 - 70))
+    tl.sound(11.32, "ding")
+    tl.sound(11.4, "chips")
     why = item["why"][:3]
     size = 54
     while True:
@@ -504,6 +519,8 @@ def build_quiz(item: dict, handle: str | None) -> Timeline:
             d.arc((ring_cx - rr, ring_cy - rr, ring_cx + rr, ring_cy + rr), -90, -90 + 360 * (1 - p),
                   fill=GOLD, width=12)
     tl.add(ring)
+    for k in range(3):
+        tl.sound(7.0 + k, "tick", 1.0)
     tl.add(El(D.text_sprite("Comment your answer", 56, WHITE, "black", max_lines=1), CX, 990, 7.0, 10.0,
               "pulse", pulse_amp=0.04, pulse_hz=2))
 
@@ -514,6 +531,8 @@ def build_quiz(item: dict, handle: str | None) -> Timeline:
     tl.add(El(D.text_sprite(item["explain"], 50, WHITE, "bold", max_w=D.SAFE_W - 70, max_lines=5),
               CX, 800, 10.4, t_end, "fade", slide=(0, 20)))
     tl.add(confetti(10.0, CX, correct_y, seed=int(item["hash"][:8], 16), n=44, half_width=D.SAFE_W / 2 - 20))
+    tl.sound(10.02, "ding")
+    tl.sound(10.1, "chips")
     end_scene(tl, t_end, handle)
     tl.add(progress_bar(T))
     return tl
@@ -530,23 +549,44 @@ def pick_music(rng: random.Random | None = None) -> Path | None:
     return (rng or random.Random()).choice(files) if files else None
 
 
+def build_audio(tl: Timeline, wav_path: Path, with_beat: bool, seed: int) -> None:
+    """Sound effects synced to the timeline, plus an original generated beat when no
+    user music is supplied. Written as a WAV for ffmpeg."""
+    from . import audio as A
+    T = tl.duration
+    fx = A.sfx_track(tl.sounds, T)
+    if with_beat:
+        beat = A.beat_track(T, seed)
+        A.fade(beat, 1.0)
+        out = A.mix((beat, 0.55), (fx, 1.0))
+    else:
+        out = fx
+    A.normalize(out, 0.89)
+    A.write_wav(wav_path, out)
+
+
 def encode(tl: Timeline, out_path: Path, music: Path | None, music_gain_db: float = -18.0,
-           preset: str = "medium") -> None:
+           preset: str = "medium", seed: int = 0) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     T = tl.duration
     nframes = int(round(T * FPS))
+    sfx_wav = out_path.with_suffix(".sfx.wav")
+    build_audio(tl, sfx_wav, with_beat=music is None, seed=seed)
     cmd = ["ffmpeg", "-y", "-loglevel", "error",
-           "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-"]
+           "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
+           "-i", str(sfx_wav)]
     if music:
         cmd += ["-stream_loop", "-1", "-i", str(music)]
         # asetpts makes timestamps continuous across loops so the fade-out lands at the end.
-        af = (f"aresample=44100,asetpts=N/SR/TB,atrim=0:{T:.3f},volume={music_gain_db}dB,"
+        fc = (f"[2:a]aresample=44100,asetpts=N/SR/TB,atrim=0:{T:.3f},volume={music_gain_db}dB,"
               f"afade=t=in:st=0:d=1,afade=t=out:st={T - 1:.3f}:d=1,"
-              f"aformat=sample_rates=44100:channel_layouts=stereo")
-        cmd += ["-filter:a", af]
+              f"aformat=sample_rates=44100:channel_layouts=stereo[m];"
+              f"[1:a]aformat=sample_rates=44100:channel_layouts=stereo[s];"
+              f"[m][s]amix=inputs=2:duration=first:normalize=0,{LOUDNORM}[a]")
+        cmd += ["-filter_complex", fc, "-map", "0:v:0", "-map", "[a]"]
     else:
-        cmd += ["-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100"]
-    cmd += ["-map", "0:v:0", "-map", "1:a:0",
+        cmd += ["-filter_complex", f"[1:a]{LOUDNORM}[a]", "-map", "0:v:0", "-map", "[a]"]
+    cmd += [
             "-c:v", "libx264", "-preset", preset, "-crf", "20", "-pix_fmt", "yuv420p",
             "-profile:v", "high", "-r", str(FPS), "-g", str(FPS * 2),
             "-c:a", "aac", "-b:a", "128k", "-ar", "44100", "-ac", "2",
@@ -558,6 +598,7 @@ def encode(tl: Timeline, out_path: Path, music: Path | None, music_gain_db: floa
     finally:
         proc.stdin.close()
         rc = proc.wait()
+        sfx_wav.unlink(missing_ok=True)
     if rc != 0:
         raise RuntimeError(f"ffmpeg failed with exit code {rc}")
 
@@ -576,7 +617,7 @@ def render_item(item: dict, out_path: Path, handle: str | None = None, music: Pa
     tl = build_timeline(item, handle)
     track = pick_music(rng) if music is True else (music or None)
     gain = float(os.environ.get("MUSIC_GAIN_DB", "-18"))
-    encode(tl, out_path, track, gain)
+    encode(tl, out_path, track, gain, seed=int(item["hash"][:8], 16))
     return {"path": str(out_path), "duration": tl.duration, "music": track.name if track else None}
 
 

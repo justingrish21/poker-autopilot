@@ -106,8 +106,12 @@ The page in `linktree/` sends viewers to the club (ClubGG invite link). Build it
 TikTok bio's website field. Until TikTok allows a clickable link (usually 1,000 followers or
 a Business account), write "Free poker club: link on my profile soon" or similar as text.
 
-### 6. Music (optional, any time)
-Drop `.mp3` or `.wav` beats into `music/` and push. Each video picks one at random and mixes it in at about -18 dB with a 1 s fade in/out. With no files there, videos get a silent audio track. To change the level, add a repository **variable** (not a secret) `MUSIC_GAIN_DB`, e.g. `-12`.
+### 6. Sound (automatic) and your beats (optional, any time)
+Every video has sound: effects synced to the action (card flips, chip clinks, whooshes, countdown ticks,
+a ding on the right answer, an impact on reveals, a heartbeat during the river sweat, a win or bad-beat sting)
+over an original beat generated in code. Everything is synthesized, so no samples and no licensing issues.
+Drop your own `.mp3`/`.wav` beats into `music/` and they replace the generated beat (mixed at about -18 dB under
+the effects). The final mix is loudness-matched to about -15 LUFS. Set the `MUSIC_GAIN_DB` repo variable to change the beat level.
 
 ---
 

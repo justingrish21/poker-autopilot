@@ -248,8 +248,10 @@ def build_allin(item: dict, handle: str | None) -> Timeline:
     hero_xy = [(SEATS[4][0] - 52, 1262), (SEATS[4][0] + 52, 1262)]
     for s in range(4):
         tl.add(_Deal(small_back, (CX, BOARD_Y), card_spot[s], deal_t + 0.08 * s))
+        tl.sound(deal_t + 0.08 * s, "flip", 0.6)
     for i in range(2):
         tl.add(_Deal(D.card_back(140), (CX, BOARD_Y), hero_xy[i], deal_t + 0.35 + 0.1 * i, until=1.25))
+        tl.sound(deal_t + 0.35 + 0.1 * i, "flip", 0.6)
     for i, c in enumerate(hero):
         img = D.card_face(c, 140).rotate((-5, 5)[i], resample=Image.BICUBIC, expand=True)
         table_cards.append(tl.add(El(img, *hero_xy[i], 1.25 + 0.1 * i, None, "flip", dur=0.4,
@@ -360,6 +362,8 @@ def build_allin(item: dict, handle: str | None) -> Timeline:
         caps.append((t, item["captions"]["turn"], 60))
         t += 1.5
     caps.append((t, item["captions"]["sweat"], 66))
+    for k in range(3):  # heartbeat during the sweat
+        tl.sound(t + 0.1 + 0.9 * k, "thump")
     t += 1.6
     t_river = reveal(4, 5, t, slow=True)
     hero_wins = item.get("outcome") == "hero"
@@ -371,6 +375,7 @@ def build_allin(item: dict, handle: str | None) -> Timeline:
     if hero_wins:
         tl.add(confetti(t_river + 0.05, CX, BOARD_Y, seed=int(item["hash"][:8], 16), n=56, half_width=300))
     caps.append((t_river, item["captions"]["river"], 120))
+    tl.sound(t_river + 0.15, "win" if hero_wins else "sad")
     # pot to the winner
     sc.fly(t_river + 0.9, POT_XY, SEATS[win], n=5, dur=0.5)
     st["stacks"][win] += st["pot"]
@@ -391,6 +396,8 @@ def build_allin(item: dict, handle: str | None) -> Timeline:
     for i, (t0, text, size) in enumerate(caps):
         t1 = caps[i + 1][0] if i + 1 < len(caps) else t_end
         tl.add(El(caption(text, size), CX, CAPTION_Y, t0, t1, "pop", dur=0.3, out=0.12))
+    for t0, dur, a, b, n in sc.flights:  # chips sliding into / out of the pot
+        tl.sound(t0, "chips", 0.7)
     end_scene(tl, t_end, handle)
     return tl
 
