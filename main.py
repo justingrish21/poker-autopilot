@@ -176,6 +176,9 @@ def main(argv=None) -> int:
         item = find_item(args.item)
     else:
         fmt = args.format or planned_format(history)
+        if fmt is None:
+            log("Today's quiz and all-in story are already posted. Nothing to do this run.")
+            return 0
         item = next_item(history, fmt, rng=rng)
     errs = validate_item(item)
     if errs:

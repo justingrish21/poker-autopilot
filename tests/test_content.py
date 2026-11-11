@@ -92,4 +92,4 @@ def test_daily_plan_quiz_then_allin():
                     {"format": "quiz", "status": "failed", "posted_at": noon.isoformat()}]}
     assert planned_format(h2, evening) == "quiz"
     h["posts"].append({"format": "allin", "status": "posted", "posted_at": evening.isoformat()})
-    assert planned_format(h, evening) in ("quiz", "allin")
+    assert planned_format(h, evening) is None  # day complete: scheduled runs skip

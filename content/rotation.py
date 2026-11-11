@@ -42,9 +42,10 @@ def local_date(ts: datetime):
         return (ts.astimezone(timezone.utc) - timedelta(hours=5)).date()
 
 
-def planned_format(history: dict, now: datetime | None = None) -> str:
+def planned_format(history: dict, now: datetime | None = None) -> str | None:
     """Today's next format from DAILY_PLAN: whatever hasn't been posted yet today.
-    Robust to late or failed runs: a day never gets two quizzes before its all-in story."""
+    Robust to late or failed runs: a day never gets two quizzes before its all-in story.
+    Returns None when today's plan is already complete (scheduled runs then skip)."""
     now = now or datetime.now(timezone.utc)
     today = local_date(now)
     posted_today = []
@@ -63,7 +64,7 @@ def planned_format(history: dict, now: datetime | None = None) -> str:
     for fmt in DAILY_PLAN:
         if fmt not in posted_today:
             return fmt
-    return DAILY_PLAN[len(posted_today) % len(DAILY_PLAN)]  # extra manual runs keep alternating
+    return None
 
 
 def load_history(path: Path = HISTORY_PATH) -> dict:
