@@ -28,7 +28,9 @@ It costs nothing to run besides your Post for Me plan. GitHub Actions is free fo
 
 ## Content never runs out
 
-* Formats rotate breakdown → quiz → all-in story until the learner has data, then it picks the mix.
+* **Daily plan:** every day posts **one quiz and one all-in story**. The first post of the Detroit day is the quiz,
+  the second is the all-in story (checked against what was already posted today, so late or failed runs never double up).
+  Hand breakdowns are still available manually: Actions → Post to TikTok → Run workflow → format `breakdown`.
 * `content/library.json` holds your 14 breakdowns and 14 quizzes. They're used first, in order.
 * After that, `content/generators.py` creates unlimited new, mathematically verified content:
   pot odds, outs (counted by enumerating the deck), Rule of 2 and 4 (with the exact %),
@@ -48,7 +50,6 @@ The goal is club sign-ups, so every run:
    Signals that mean "I want more / I want in" count far more than passive views.
 3. **Adjusts automatically** using Thompson sampling (a standard "test and shift" method). After 6 judged
    videos it starts favoring what scores best while still testing alternatives:
-   * **Format:** breakdown vs quiz. It never posts the same format 3 times in a row.
    * **Content type:** pot odds, outs, equity, combos, call-or-fold draws, and bad beat vs suckout vs cooler.
    * **Hook tag** on the opening screen ("POKER QUIZ", "WHAT WOULD YOU DO?"...).
    * **Caption call-to-action.**

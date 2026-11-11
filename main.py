@@ -20,7 +20,7 @@ from pathlib import Path
 from content import learning
 from content.library import validate_item
 from content.rotation import (HISTORY_PATH, USED_STATUSES, find_item, history_entry, load_history,
-                              next_item, now_iso, save_history)
+                              next_item, now_iso, planned_format, save_history)
 from publish.captions import build_caption, cta_options
 from publish.postforme import PostForMe, PostForMeError
 from render.video import BREAKDOWN_TAGS, QUIZ_TAGS, pick, render_item
@@ -146,7 +146,11 @@ def main(argv=None) -> int:
             return 0
 
     rng = random.Random()
-    item = find_item(args.item) if args.item else next_item(history, args.format, rng=rng)
+    if args.item:
+        item = find_item(args.item)
+    else:
+        fmt = args.format or planned_format(history)
+        item = next_item(history, fmt, rng=rng)
     errs = validate_item(item)
     if errs:
         gh_error("content failed validation: " + "; ".join(errs))

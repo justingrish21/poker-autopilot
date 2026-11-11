@@ -76,3 +76,20 @@ def test_compliance_catches_money_talk():
                 "win $100"]:
         assert compliance_problems(bad), bad
     assert compliance_problems("100bb cash  |  You: Button") == []
+
+
+def test_daily_plan_quiz_then_allin():
+    from datetime import datetime, timezone
+    from content.rotation import planned_format
+    noon = datetime(2026, 11, 12, 17, 35, tzinfo=timezone.utc)      # 12:35 PM Detroit
+    evening = datetime(2026, 11, 13, 0, 35, tzinfo=timezone.utc)    # 7:35 PM Detroit, same local day
+    h = {"posts": []}
+    assert planned_format(h, noon) == "quiz"
+    h["posts"].append({"format": "quiz", "status": "posted", "posted_at": noon.isoformat()})
+    assert planned_format(h, evening) == "allin"
+    # yesterday's posts don't count; a failed quiz today means the next run retries the quiz
+    h2 = {"posts": [{"format": "quiz", "status": "posted", "posted_at": "2026-11-11T17:35:00+00:00"},
+                    {"format": "quiz", "status": "failed", "posted_at": noon.isoformat()}]}
+    assert planned_format(h2, evening) == "quiz"
+    h["posts"].append({"format": "allin", "status": "posted", "posted_at": evening.isoformat()})
+    assert planned_format(h, evening) in ("quiz", "allin")

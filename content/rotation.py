@@ -23,11 +23,47 @@ from .library import load_library
 ROOT = Path(__file__).resolve().parent.parent
 HISTORY_PATH = ROOT / "state" / "history.json"
 FORMATS = ("breakdown", "quiz", "allin")
+# What posts automatically each day (Detroit time): first post = quiz, second = all-in story.
+DAILY_PLAN = ("quiz", "allin")
+LOCAL_TZ = "America/Detroit"
 USED_STATUSES = {"posted", "processing"}  # "failed" entries do not block reuse
 
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+def local_date(ts: datetime):
+    try:
+        from zoneinfo import ZoneInfo
+        return ts.astimezone(ZoneInfo(LOCAL_TZ)).date()
+    except Exception:  # no tz database: Eastern Standard Time is close enough for "which day"
+        from datetime import timedelta
+        return (ts.astimezone(timezone.utc) - timedelta(hours=5)).date()
+
+
+def planned_format(history: dict, now: datetime | None = None) -> str:
+    """Today's next format from DAILY_PLAN: whatever hasn't been posted yet today.
+    Robust to late or failed runs: a day never gets two quizzes before its all-in story."""
+    now = now or datetime.now(timezone.utc)
+    today = local_date(now)
+    posted_today = []
+    for p in history["posts"]:
+        if p.get("status") not in USED_STATUSES:
+            continue
+        ts = p.get("posted_at") or p.get("created_at")
+        try:
+            when = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+        except ValueError:
+            continue
+        if when.tzinfo is None:
+            when = when.replace(tzinfo=timezone.utc)
+        if local_date(when) == today:
+            posted_today.append(p.get("format"))
+    for fmt in DAILY_PLAN:
+        if fmt not in posted_today:
+            return fmt
+    return DAILY_PLAN[len(posted_today) % len(DAILY_PLAN)]  # extra manual runs keep alternating
 
 
 def load_history(path: Path = HISTORY_PATH) -> dict:

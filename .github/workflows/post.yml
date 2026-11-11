@@ -9,12 +9,19 @@ on:
     # 1:30 PM and 8:30 PM Detroit time. GitHub may also start scheduled runs a few minutes late.
     - cron: "30 17 * * *"
     - cron: "30 0 * * *"
+  # Each day posts one quiz and one all-in story (bad beat / suckout / cooler):
+  # the first post of the Detroit day is the quiz, the second is the all-in story.
   workflow_dispatch:
     inputs:
       dry_run:
         description: "Dry run: render the video and caption, but don't post"
         type: boolean
         default: true
+      format:
+        description: "Format (auto = today's plan: quiz first, then all-in story)"
+        type: choice
+        options: [auto, quiz, allin, breakdown]
+        default: auto
 
 permissions:
   contents: write
@@ -30,6 +37,7 @@ jobs:
     timeout-minutes: 45
     env:
       DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'true' || 'false' }}
+      FORMAT: ${{ github.event_name == 'workflow_dispatch' && inputs.format || 'auto' }}
       MUSIC_GAIN_DB: ${{ vars.MUSIC_GAIN_DB || '-18' }}
     steps:
       - uses: actions/checkout@v4
@@ -51,10 +59,12 @@ jobs:
           PFM_TIKTOK_ACCOUNT_ID: ${{ secrets.PFM_TIKTOK_ACCOUNT_ID }}
           BRAND_HANDLE: ${{ secrets.BRAND_HANDLE }}
         run: |
+          ARGS=""
+          if [ "$FORMAT" != "auto" ] && [ -n "$FORMAT" ]; then ARGS="--format $FORMAT"; fi
           if [ "$DRY_RUN" = "true" ]; then
-            python main.py --dry-run
+            python main.py --dry-run $ARGS
           else
-            python main.py
+            python main.py $ARGS
           fi
 
       - name: Upload rendered video
