@@ -10,11 +10,13 @@ from __future__ import annotations
 
 import json
 import os
+import random
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .generators import generate, generated_id
+from .generators import BREAKDOWN_KINDS, QUIZ_KINDS, generate, generated_id
+from .learning import choose
 from .library import load_library
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -54,20 +56,37 @@ def used_sets(history: dict) -> tuple[set[str], set[str]]:
     return ids, hashes
 
 
-def next_format(history: dict) -> str:
-    for p in reversed(history["posts"]):
-        if p.get("status") in USED_STATUSES and p.get("format") in FORMATS:
-            return "quiz" if p["format"] == "breakdown" else "breakdown"
-    return "breakdown"
+KINDS = {"breakdown": BREAKDOWN_KINDS, "quiz": QUIZ_KINDS}
 
 
-def next_item(history: dict, fmt: str | None = None, max_scan: int = 5000) -> dict:
-    fmt = fmt or next_format(history)
+def next_format(history: dict, rng: random.Random | None = None) -> str:
+    """Alternate formats until there's data; then let results pick the format,
+    but never post the same format more than twice in a row."""
+    used = [p.get("format") for p in history["posts"] if p.get("status") in USED_STATUSES
+            and p.get("format") in FORMATS]
+    alternate = ("quiz" if used[-1] == "breakdown" else "breakdown") if used else "breakdown"
+    learned = choose(history, "format", list(FORMATS), rng) if rng else None
+    if learned is None:
+        return alternate
+    if len(used) >= 2 and used[-1] == used[-2] == learned:
+        return "quiz" if learned == "breakdown" else "breakdown"
+    return learned
+
+
+def next_item(history: dict, fmt: str | None = None, max_scan: int = 5000,
+              rng: random.Random | None = None) -> dict:
+    """Library first (in order), then generated content. Once there's data, the
+    generated content type (pot odds, outs, equity...) is picked by past results."""
+    fmt = fmt or next_format(history, rng)
     ids, hashes = used_sets(history)
     for item in load_library()[fmt]:
         if item["id"] not in ids and item["hash"] not in hashes:
             return item
+    kinds = KINDS[fmt]
+    kind = choose(history, "kind", list(kinds), rng) if rng else None
     for n in range(max_scan):
+        if kind is not None and kinds[n % len(kinds)] != kind:
+            continue
         if generated_id(fmt, n) in ids:
             continue  # cheap skip without generating
         item = generate(fmt, n)

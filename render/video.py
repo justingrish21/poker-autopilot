@@ -442,7 +442,7 @@ def build_breakdown(item: dict, handle: str | None) -> Timeline:
         for c, x in zip(cards, xs):
             if c:
                 tl.add(El(D.card_face(c, mini), x, 1455, 11.8, t_end, "fade"))
-    end_scene(tl, t_end, handle, pick(END_TEASERS, item, "end"))
+    end_scene(tl, t_end, handle, item.get("teaser") or pick(END_TEASERS, item, "end"))
     tl.add(progress_bar(T))
     return tl
 
@@ -521,7 +521,7 @@ def build_quiz(item: dict, handle: str | None) -> Timeline:
     tl.add(El(D.text_sprite(item["explain"], 50, WHITE, "bold", max_w=D.SAFE_W - 70, max_lines=5),
               CX, 800, 10.4, t_end, "fade", slide=(0, 20)))
     tl.add(confetti(10.0, CX, correct_y, seed=int(item["hash"][:8], 16), n=44, half_width=D.SAFE_W / 2 - 20))
-    end_scene(tl, t_end, handle, pick(END_TEASERS, item, "end"))
+    end_scene(tl, t_end, handle, item.get("teaser") or pick(END_TEASERS, item, "end"))
     tl.add(progress_bar(T))
     return tl
 

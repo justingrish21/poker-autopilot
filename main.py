@@ -11,19 +11,23 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import random
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
+from content import learning
 from content.library import validate_item
 from content.rotation import (HISTORY_PATH, USED_STATUSES, find_item, history_entry, load_history,
                               next_item, now_iso, save_history)
-from publish.captions import build_caption
+from publish.captions import build_caption, cta_options
 from publish.postforme import PostForMe, PostForMeError
-from render.video import render_item
+from render.video import BREAKDOWN_TAGS, END_TEASERS, QUIZ_TAGS, pick, render_item
 
 ROOT = Path(__file__).resolve().parent
 OUT_DIR = ROOT / "out"
+REPORT_PATH = ROOT / "state" / "performance.md"
 
 
 def log(msg: str) -> None:
@@ -85,35 +89,76 @@ def reconcile_pending(client: PostForMe, history: dict, account_id: str | None) 
     return changed
 
 
+def time_slot(now: datetime | None = None) -> str:
+    """Which daily slot this run is (cron 17:30 UTC = midday ET, 00:30 UTC = evening ET)."""
+    h = (now or datetime.now(timezone.utc)).hour
+    return "midday" if 12 <= h < 22 else "evening"
+
+
+def choose_variants(item: dict, history: dict, index: int, rng: random.Random) -> dict:
+    """Pick the hook tag, end-card teaser and caption CTA: learned from results once
+    there's enough data, otherwise a deterministic rotation."""
+    tags = BREAKDOWN_TAGS if item["format"] == "breakdown" else QUIZ_TAGS
+    ctas = cta_options(item["format"])
+    tag = learning.choose(history, "tag", tags, rng) or pick(tags, item)
+    teaser = learning.choose(history, "teaser", END_TEASERS, rng) or pick(END_TEASERS, item, "end")
+    cta = learning.choose(history, "cta", ctas, rng) or ctas[index % len(ctas)]
+    return {"tag": tag, "teaser": teaser, "cta": cta}
+
+
+def sync_and_report(client: PostForMe, history: dict, account_id: str) -> None:
+    try:
+        learning.sync_metrics(client, history, account_id, log=log)
+    except Exception as e:  # metrics must never block posting
+        log(f"  metrics sync skipped: {e}")
+    save_history(history)
+    REPORT_PATH.write_text(learning.report(history) + "\n")
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dry-run", action="store_true", help="render into out/ and skip posting")
     ap.add_argument("--item", help="render/post a specific item id (library id or gen-<format>-<n>)")
     ap.add_argument("--format", choices=["breakdown", "quiz"], help="force the format for this run")
     ap.add_argument("--no-music", action="store_true", help="ignore music/ and use a silent track")
+    ap.add_argument("--report-only", action="store_true",
+                    help="only pull metrics and rewrite state/performance.md (no video)")
     args = ap.parse_args(argv)
 
     handle = os.environ.get("BRAND_HANDLE", "").strip() or None
     api_key = os.environ.get("POST_FOR_ME_API_KEY", "").strip()
     account_id = os.environ.get("PFM_TIKTOK_ACCOUNT_ID", "").strip()
 
-    if not args.dry_run and (not api_key or not account_id):
+    if (not args.dry_run or args.report_only) and (not api_key or not account_id):
         gh_error("POST_FOR_ME_API_KEY and PFM_TIKTOK_ACCOUNT_ID must be set (or use --dry-run).")
         return 2
 
     history = load_history()
     client = PostForMe(api_key) if not args.dry_run else None
+    if args.report_only:
+        client = PostForMe(api_key)
     if client and reconcile_pending(client, history, account_id):
         save_history(history)
+    if client:
+        log("Syncing TikTok metrics...")
+        sync_and_report(client, history, account_id)
+        if args.report_only:
+            log(f"Wrote {REPORT_PATH}")
+            return 0
 
-    item = find_item(args.item) if args.item else next_item(history, args.format)
+    rng = random.Random()
+    item = find_item(args.item) if args.item else next_item(history, args.format, rng=rng)
     errs = validate_item(item)
     if errs:
         gh_error("content failed validation: " + "; ".join(errs))
         return 3
     index = sum(1 for p in history["posts"] if p.get("status") in USED_STATUSES)
-    caption = build_caption(item, index)
+    variants = choose_variants(item, history, index, rng)
+    item["tag"], item["teaser"] = variants["tag"], variants["teaser"]
+    caption = build_caption(item, index, cta=variants["cta"])
     log(f"Item: {item['id']} ({item['format']}, {item.get('kind', 'library')}) hash={item['hash']}")
+    log(f"  learning {'ON' if learning.learning_active(history) else 'warming up'}: tag={variants['tag']!r} "
+        f"teaser={variants['teaser']!r}")
 
     OUT_DIR.mkdir(exist_ok=True)
     mp4 = OUT_DIR / f"{item['id']}.mp4"
@@ -137,6 +182,11 @@ def main(argv=None) -> int:
 
     external_id = f"pa-{item['id']}-{item['hash']}-{len(history['posts'])}"
     entry = history_entry(item, external_id=external_id, music=meta["music"])
+    entry["features"] = {
+        "format": item["format"], "kind": item.get("kind", "library"), "tag": variants["tag"],
+        "teaser": variants["teaser"], "cta": variants["cta"], "slot": time_slot(),
+        "music": "beat" if meta["music"] else "silent", "hook": item.get("hook"),
+    }
     try:
         log("Uploading media to Post for Me...")
         media_url = client.upload_media(mp4, log=log)

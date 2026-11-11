@@ -36,10 +36,14 @@ def hashtags_for(index: int, count: int = 5) -> list[str]:
     return ["#poker"] + picked
 
 
-def build_caption(item: dict, index: int) -> str:
+def cta_options(fmt: str) -> list[str]:
+    return QUIZ_CTAS if fmt == "quiz" else BREAKDOWN_CTAS
+
+
+def build_caption(item: dict, index: int, cta: str | None = None) -> str:
     base = (item.get("caption") or template_caption(item)).strip()
-    ctas = QUIZ_CTAS if item["format"] == "quiz" else BREAKDOWN_CTAS
-    cta = ctas[index % len(ctas)]
+    ctas = cta_options(item["format"])
+    cta = cta or ctas[index % len(ctas)]
     tags = " ".join(hashtags_for(index, 4 + index % 3))
     caption = f"{base}\n\n{cta}\n{CLUB_LINE}\n\n{tags}"
     if len(caption) > MAX_LEN:

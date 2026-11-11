@@ -14,6 +14,7 @@ Endpoints and field names were taken from the official `post-for-me` Python SDK
   GET  /v1/social-posts?external_id=... -> {"data": [...], "meta": {...}}
   GET  /v1/social-post-results?post_id=...  -> {"data": [{success, error, platform_data{id,url}, ...}]}
   GET  /v1/social-accounts?platform=...     -> {"data": [{id, platform, username, status, ...}]}
+  GET  /v1/social-account-feeds/{account}?expand=metrics -> {"data": [{social_post_id, platform_url, metrics}]}
 """
 from __future__ import annotations
 
@@ -155,6 +156,21 @@ class PostForMe:
     def get_results(self, post_id: str) -> list[dict]:
         page = self.request("GET", "/v1/social-post-results", params={"post_id": post_id, "limit": 20})
         return page.get("data") or []
+
+    def feed(self, account_id: str, max_pages: int = 10, page_size: int = 50):
+        """Yield the account's platform posts with metrics (newest first)."""
+        cursor = None
+        for _ in range(max_pages):
+            params = {"expand": "metrics", "limit": page_size}
+            if cursor:
+                params["cursor"] = cursor
+            page = self.request("GET", f"/v1/social-account-feeds/{urllib.parse.quote(account_id)}", params=params)
+            for item in page.get("data") or []:
+                yield item
+            meta = page.get("meta") or {}
+            if not meta.get("has_more") or not meta.get("cursor") or meta.get("cursor") == cursor:
+                return
+            cursor = meta["cursor"]
 
     # -- high level ---------------------------------------------------------
     def upload_media(self, path: Path, log=print) -> str:

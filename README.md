@@ -35,6 +35,28 @@ It costs nothing to run besides your Post for Me plan. GitHub Actions is free fo
 * `state/history.json` records every post (id, content hash, time, Post for Me post id, status, TikTok URL).
   The same content is never posted twice.
 
+## It learns what makes people want to play
+
+The goal is club sign-ups, so every run:
+
+1. **Pulls TikTok results** for past videos from Post for Me (views, likes, comments, shares;
+   with a TikTok **Business** account also profile views, new followers and link clicks).
+2. **Scores each video for "club intent"** once it's 48 hours old:
+   `0.02 x views + likes + 4 x comments + 6 x shares + 3 x saves + 5 x profile views + 15 x follows + 25 x link clicks`.
+   Signals that mean "I want more / I want in" count far more than passive views.
+3. **Adjusts automatically** using Thompson sampling (a standard "test and shift" method). After 6 judged
+   videos it starts favoring what scores best while still testing alternatives:
+   * **Format:** breakdown vs quiz. It never posts the same format 3 times in a row.
+   * **Content type:** pot odds, outs, equity, combos, call-or-fold draws. This kicks in once the starter library is used up.
+   * **Hook tag** on the opening screen ("POKER QUIZ", "WHAT WOULD YOU DO?"...).
+   * **End-card teaser** ("Think you'd play it better? Prove it at the tables."...).
+   * **Caption call-to-action.**
+4. **Writes `state/performance.md`:** a plain-English report of what's winning, plus the top and weakest videos with links.
+   Open it on GitHub any time.
+
+Tip: switch the TikTok account to a free **Business account** (Settings → Account → Switch to Business account).
+That unlocks profile views, follows and link clicks, which are the closest signals to "wants to join the club".
+
 ---
 
 ## Setup (one time, about 10 minutes)
@@ -130,7 +152,9 @@ render/                 Pillow drawing + timeline animation + ffmpeg encoding
 publish/postforme.py    Post for Me API client (upload, post, poll results)
 publish/captions.py     caption + CTA + hashtags (no links, compliance-checked)
 scripts/list_accounts.py  print your Post for Me account ids
-state/history.json      everything that has been posted
+state/history.json      everything that has been posted (+ its TikTok metrics)
+state/performance.md    auto-updated report: what's working
+content/learning.py     metrics sync, club-intent score, Thompson-sampling choices
 music/                  drop beats here
 assets/fonts/           Poppins (OFL) + DejaVu Sans (suit symbols)
 ```
