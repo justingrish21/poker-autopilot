@@ -94,8 +94,12 @@ Also check **Settings → Actions → General → Workflow permissions** is set 
 
 From then on it runs on its own twice a day.
 
-### 5. Put your Telegram club in your TikTok bio
-Edit your TikTok profile and add your Telegram club link as the bio website. TikTok usually only allows a clickable link once you have 1,000 followers (or on a Business account). Until then, write the Telegram handle in the bio as text, e.g. `Free play-money club: Telegram @yourclub`.
+### 5. Put your link-in-bio page in your TikTok bio
+The page in `linktree/` sends viewers to the club (ClubGG invite link). Build it with
+`cd linktree && npm ci && npm run build`, then upload the `dist/` folder to Netlify Drop
+(app.netlify.com/drop) and put the resulting `https://<name>.netlify.app` address in the
+TikTok bio's website field. Until TikTok allows a clickable link (usually 1,000 followers or
+a Business account), write "Free poker club: link on my profile soon" or similar as text.
 
 ### 6. Music (optional, any time)
 Drop `.mp3` or `.wav` beats into `music/` and push. Each video picks one at random and mixes it in at about -18 dB with a 1 s fade in/out. With no files there, videos get a silent audio track. To change the level, add a repository **variable** (not a secret) `MUSIC_GAIN_DB`, e.g. `-12`.

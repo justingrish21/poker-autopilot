@@ -2,6 +2,7 @@
 order: 1
 primary: true
 title: Join the free play-money club
+note: Opens our club in the free ClubGG app
 emoji: ♠️
-href: https://t.me/REPLACE_WITH_YOUR_CLUB
+href: https://clubgg.app.link/wyef7MTpZ7b
 ---

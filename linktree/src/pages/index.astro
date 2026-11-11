@@ -18,7 +18,8 @@ const links = (await Astro.glob("../data/links/*.md")).sort(
         <div class="flex flex-col gap-4">
             {links.map((link) => (
                 <Link emoji={link.frontmatter.emoji} title={link.frontmatter.title}
-                      href={link.frontmatter.href} primary={link.frontmatter.primary} />
+                      href={link.frontmatter.href} primary={link.frontmatter.primary}
+                      note={link.frontmatter.note} />
             ))}
         </div>
 

@@ -4,9 +4,10 @@ export interface Props {
 	emoji: string;
 	href: string;
 	primary?: boolean;
+	note?: string;
 }
 
-const { title, emoji, href, primary } = Astro.props;
+const { title, emoji, href, primary, note } = Astro.props;
 const base = "flex w-full items-center justify-center gap-3 rounded-2xl px-6 py-5 text-center text-lg font-bold shadow-lg transition hover:-translate-y-0.5 hover:shadow-2xl focus:outline-none focus:ring-4";
 const style = primary
 	? "bg-yellow-400 text-gray-900 ring-yellow-200 focus:ring-yellow-200 animate-pulse-slow"
@@ -15,5 +16,8 @@ const style = primary
 
 <a href={href} class={`${base} ${style}`} target="_blank" rel="noopener">
     <span class="text-2xl">{emoji}</span>
-    <span>{title}</span>
+    <span class="flex flex-col">
+        <span>{title}</span>
+        {note && <span class="text-sm font-semibold opacity-75">{note}</span>}
+    </span>
 </a>
