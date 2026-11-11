@@ -1,0 +1,20 @@
+---
+import Social from './Social.astro';
+
+export interface Props {
+	subtitle: string;
+	title: string;
+	tagline: string;
+}
+
+const { subtitle, title, tagline } = Astro.props;
+const socials = await Astro.glob("../data/socials/*.md");
+---
+
+<header class="mx-auto max-w-xl px-5 pt-12 pb-6 text-center">
+    <img class="mx-auto h-32 w-32 rounded-full shadow-2xl ring-4 ring-yellow-400/80" src="/avatar.png" alt="PokerPilot logo" width="128" height="128" />
+    <h1 class="mt-5 text-4xl font-extrabold tracking-tight">{title}</h1>
+    <p class="mt-2 text-lg font-bold text-yellow-400">{subtitle}</p>
+    <p class="mx-auto mt-3 max-w-md text-base font-semibold text-gray-300">{tagline}</p>
+    <Social socials={socials} />
+</header>
