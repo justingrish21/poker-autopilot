@@ -44,21 +44,20 @@ It costs nothing to run besides your Post for Me plan. GitHub Actions is free fo
 2. Create an **API key** and copy it. It starts with something like `pfm_`.
 3. Under social accounts, **connect your TikTok** account.
 
-### 2. Find your TikTok account id
-On your computer (Python 3.11+ is enough, nothing to install):
+### 2. Add your API key to GitHub, then find your TikTok account id
+1. In this repo: **Settings → Secrets and variables → Actions → New repository secret**.
+   Name `POST_FOR_ME_API_KEY`, value = your Post for Me API key.
+2. Go to the **Actions** tab → **List Post for Me accounts** → **Run workflow**.
+3. Open the finished run. The summary lists your connected accounts; copy the **id** shown for TikTok (it looks like `spc_...`).
 
-```bash
-POST_FOR_ME_API_KEY=your_key_here python scripts/list_accounts.py
-```
-
-It prints your connected accounts. Copy the **id** shown for TikTok (it looks like `spc_...`).
+(Or on your computer: `POST_FOR_ME_API_KEY=your_key python scripts/list_accounts.py`.)
 
 ### 3. Add the GitHub secrets
 In this repo: **Settings → Secrets and variables → Actions → New repository secret**. Add:
 
 | Name | Value |
 |---|---|
-| `POST_FOR_ME_API_KEY` | your Post for Me API key |
+| `POST_FOR_ME_API_KEY` | your Post for Me API key (already added in step 2) |
 | `PFM_TIKTOK_ACCOUNT_ID` | the TikTok id from step 2 |
 | `BRAND_HANDLE` | your TikTok handle, e.g. `@yourpokerhandle` (shown on the end card; optional) |
 

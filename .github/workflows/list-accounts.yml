@@ -1,0 +1,31 @@
+name: List Post for Me accounts
+
+# Run this from the Actions tab after adding the POST_FOR_ME_API_KEY secret.
+# It prints your connected social accounts so you can copy the TikTok id
+# into the PFM_TIKTOK_ACCOUNT_ID secret. Account ids are not secret.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: List accounts
+        env:
+          POST_FOR_ME_API_KEY: ${{ secrets.POST_FOR_ME_API_KEY }}
+        run: |
+          python scripts/list_accounts.py | tee accounts.txt
+          {
+            echo "### Connected Post for Me accounts"
+            echo '```'
+            cat accounts.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
