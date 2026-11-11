@@ -37,7 +37,72 @@
       "url": "https://www.tiktok.com/@pokerpilot08",
       "error": null,
       "updated_at": "2026-11-11T21:58:41+00:00",
-      "posted_at": "2026-11-11T21:58:41+00:00"
+      "posted_at": "2026-11-11T21:58:41+00:00",
+      "metrics_by_platform": {
+        "instagram": {
+          "views": 0.0,
+          "likes": 0.0,
+          "comments": 0.0,
+          "shares": 0.0,
+          "saves": 0.0,
+          "profile_views": null,
+          "follows": null,
+          "link_clicks": null,
+          "full_watch_rate": null,
+          "avg_watch_s": null
+        }
+      },
+      "urls": {
+        "instagram": "https://www.instagram.com/reel/DfngBC3jisE/"
+      },
+      "metrics": {
+        "views": 0.0,
+        "likes": 0.0,
+        "comments": 0.0,
+        "shares": 0.0,
+        "saves": 0.0
+      },
+      "metrics_at": "2026-11-11T21:59:05+00:00",
+      "club_score": 0.0
+    },
+    {
+      "id": "gen-allin-00000",
+      "hash": "5e9a8b05314e00df",
+      "format": "allin",
+      "kind": "badbeat",
+      "title": null,
+      "created_at": "2026-11-11T21:59:16+00:00",
+      "external_id": "pa-gen-allin-00000-5e9a8b05314e00df-1",
+      "music": null,
+      "features": {
+        "format": "allin",
+        "kind": "badbeat",
+        "tag": "none",
+        "cta": "Tag the friend who always gets lucky on the river.",
+        "slot": "midday",
+        "music": "silent",
+        "hook": "This is why poker is cruel"
+      },
+      "post_id": "sp_ZzDaSJ6oDOFeQr9LTfo",
+      "platforms": {
+        "tiktok": {
+          "state": "failed",
+          "url": null,
+          "platform_id": null,
+          "error": "\"TikTok publication could not be confirmed. Status: FAILED. Fail reason: spam_risk_user_banned_from_posting\""
+        },
+        "instagram": {
+          "state": "posted",
+          "url": "https://www.instagram.com/reel/DfngMTCCul5/",
+          "platform_id": "18120146942008274",
+          "error": null
+        }
+      },
+      "status": "posted",
+      "url": "https://www.instagram.com/reel/DfngMTCCul5/",
+      "error": "tiktok: \"TikTok publication could not be confirmed. Status: FAILED. Fail reason: spam_risk_user_banned_from_posting\"",
+      "updated_at": "2026-11-11T22:00:24+00:00",
+      "posted_at": "2026-11-11T22:00:24+00:00"
     }
   ]
 }
