@@ -36,6 +36,10 @@ def generate(fmt: str, n: int) -> dict:
     elif fmt == "breakdown":
         kind = BREAKDOWN_KINDS[n % len(BREAKDOWN_KINDS)]
         fn = BREAKDOWN_GENERATORS[kind]
+    elif fmt == "allin":
+        from .allin import ALLIN_KINDS, gen_allin
+        kind = ALLIN_KINDS[n % len(ALLIN_KINDS)]
+        fn = lambda r: gen_allin(r, kind)
     else:
         raise ValueError(fmt)
     rng = random.Random(f"{fmt}:{kind}:{n}")

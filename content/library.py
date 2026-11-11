@@ -37,6 +37,8 @@ def item_texts(item: dict) -> list[str]:
     keys = ["hook", "setup", "action", "play", "q", "explain", "caption"]
     out = [item[k] for k in keys if item.get(k)]
     out += list(item.get("why", [])) + list(item.get("options", []))
+    out += [v for v in (item.get("captions") or {}).values() if v]
+    out += [s["name"] for s in item.get("seats", [])]
     return out
 
 
@@ -93,6 +95,13 @@ def validate_item(item: dict) -> list[str]:
             errs.append(f"{item.get('id')}: duplicate options")
         if not isinstance(item.get("answer"), int) or not 0 <= item["answer"] < len(opts):
             errs.append(f"{item.get('id')}: bad answer index")
+    elif fmt == "allin":
+        if len(item.get("hero", [])) != 2 or len(item.get("villain", [])) != 2 or len(item.get("board", [])) != 5:
+            errs.append(f"{item.get('id')}: all-in story needs hero, villain and a 5-card board")
+        if not item.get("hook") or len(item.get("seats", [])) != 5:
+            errs.append(f"{item.get('id')}: missing hook or seats")
+        if item.get("seats") and item["seats"][4]["name"] != "PokerPilot":
+            errs.append(f"{item.get('id')}: hero seat must be PokerPilot")
     else:
         errs.append(f"{item.get('id')}: unknown format {fmt!r}")
     for t in item_texts(item):

@@ -98,7 +98,7 @@ def time_slot(now: datetime | None = None) -> str:
 def choose_variants(item: dict, history: dict, index: int, rng: random.Random) -> dict:
     """Pick the hook tag and caption CTA: learned from results once
     there's enough data, otherwise a deterministic rotation."""
-    tags = BREAKDOWN_TAGS if item["format"] == "breakdown" else QUIZ_TAGS
+    tags = {"breakdown": BREAKDOWN_TAGS, "quiz": QUIZ_TAGS}.get(item["format"], ["none"])
     ctas = cta_options(item["format"])
     tag = learning.choose(history, "tag", tags, rng) or pick(tags, item)
     cta = learning.choose(history, "cta", ctas, rng) or ctas[index % len(ctas)]
@@ -118,7 +118,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dry-run", action="store_true", help="render into out/ and skip posting")
     ap.add_argument("--item", help="render/post a specific item id (library id or gen-<format>-<n>)")
-    ap.add_argument("--format", choices=["breakdown", "quiz"], help="force the format for this run")
+    ap.add_argument("--format", choices=["breakdown", "quiz", "allin"], help="force the format for this run")
     ap.add_argument("--no-music", action="store_true", help="ignore music/ and use a silent track")
     ap.add_argument("--report-only", action="store_true",
                     help="only pull metrics and rewrite state/performance.md (no video)")

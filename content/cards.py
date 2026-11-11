@@ -168,3 +168,28 @@ def hand_name(c1: str, c2: str) -> str:
     a, b = RANK_LABEL[r1], RANK_LABEL[r2]
     sep = "-" if (a == "10" or b == "10") else ""
     return f"{a}{sep}{b} {kind}"
+
+
+def describe_hand(score: int) -> str:
+    """'Three of a kind, 10s', 'Straight, 9 high', 'Pair of Aces'... from an evaluate() score."""
+    cat = score >> 20
+    r = [(score >> s) & 0xF for s in (16, 12, 8, 4, 0)]
+    lab = lambda i: RANK_LABEL[RANKS[i]]
+    plural = lambda i: (lab(i) + "s") if RANKS[i] in "23456789T" else RANK_PLURAL[RANKS[i]]
+    if cat == STRAIGHT_FLUSH:
+        return "Royal flush" if r[0] == 12 else f"Straight flush, {lab(r[0])} high"
+    if cat == QUADS:
+        return f"Four of a kind, {plural(r[0])}"
+    if cat == FULL_HOUSE:
+        return f"Full house, {plural(r[0])} full of {plural(r[1])}"
+    if cat == FLUSH:
+        return f"Flush, {lab(r[0])} high"
+    if cat == STRAIGHT:
+        return f"Straight, {lab(r[0])} high"
+    if cat == TRIPS:
+        return f"Three of a kind, {plural(r[0])}"
+    if cat == TWO_PAIR:
+        return f"Two pair, {plural(r[0])} and {plural(r[1])}"
+    if cat == PAIR:
+        return f"Pair of {plural(r[0])}"
+    return f"{lab(r[0])} high"

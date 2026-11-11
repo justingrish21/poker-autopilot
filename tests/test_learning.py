@@ -61,7 +61,7 @@ def test_format_never_three_in_a_row():
     posts += [post(100, {}, 5, fmt="quiz"), post(101, {}, 5, fmt="quiz")]
     h = {"posts": posts}
     for s in range(50):
-        assert next_format(h, random.Random(s)) == "breakdown"
+        assert next_format(h, random.Random(s)) != "quiz"
 
 
 def test_kind_learning_after_library(monkeypatch):

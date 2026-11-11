@@ -15,13 +15,14 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .allin import ALLIN_KINDS
 from .generators import BREAKDOWN_KINDS, QUIZ_KINDS, generate, generated_id
 from .learning import choose
 from .library import load_library
 
 ROOT = Path(__file__).resolve().parent.parent
 HISTORY_PATH = ROOT / "state" / "history.json"
-FORMATS = ("breakdown", "quiz")
+FORMATS = ("breakdown", "quiz", "allin")
 USED_STATUSES = {"posted", "processing"}  # "failed" entries do not block reuse
 
 
@@ -56,20 +57,21 @@ def used_sets(history: dict) -> tuple[set[str], set[str]]:
     return ids, hashes
 
 
-KINDS = {"breakdown": BREAKDOWN_KINDS, "quiz": QUIZ_KINDS}
+KINDS = {"breakdown": BREAKDOWN_KINDS, "quiz": QUIZ_KINDS, "allin": ALLIN_KINDS}
 
 
 def next_format(history: dict, rng: random.Random | None = None) -> str:
-    """Alternate formats until there's data; then let results pick the format,
-    but never post the same format more than twice in a row."""
+    """Rotate breakdown -> quiz -> all-in story until there's data; then let results
+    pick the format, but never post the same format more than twice in a row."""
     used = [p.get("format") for p in history["posts"] if p.get("status") in USED_STATUSES
             and p.get("format") in FORMATS]
-    alternate = ("quiz" if used[-1] == "breakdown" else "breakdown") if used else "breakdown"
+    cycle = FORMATS[(FORMATS.index(used[-1]) + 1) % len(FORMATS)] if used else FORMATS[0]
     learned = choose(history, "format", list(FORMATS), rng) if rng else None
     if learned is None:
-        return alternate
+        return cycle
     if len(used) >= 2 and used[-1] == used[-2] == learned:
-        return "quiz" if learned == "breakdown" else "breakdown"
+        others = [f for f in FORMATS if f != learned]
+        return choose(history, "format", others, rng) or cycle
     return learned
 
 
@@ -79,7 +81,7 @@ def next_item(history: dict, fmt: str | None = None, max_scan: int = 5000,
     generated content type (pot odds, outs, equity...) is picked by past results."""
     fmt = fmt or next_format(history, rng)
     ids, hashes = used_sets(history)
-    for item in load_library()[fmt]:
+    for item in load_library().get(fmt, []):
         if item["id"] not in ids and item["hash"] not in hashes:
             return item
     kinds = KINDS[fmt]
@@ -99,7 +101,7 @@ def find_item(item_id: str) -> dict:
     """Look up a library item by id, or build a generated one from 'gen-<fmt>-<n>'."""
     lib = load_library()
     for fmt in FORMATS:
-        for it in lib[fmt]:
+        for it in lib.get(fmt, []):
             if it["id"] == item_id:
                 return it
     parts = item_id.split("-")

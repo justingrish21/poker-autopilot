@@ -38,18 +38,17 @@ def test_library_json_is_raw_as_given():
     assert set(raw) == {"breakdowns", "quizzes"}
 
 
-def test_rotation_alternates_and_uses_library_in_order():
+def test_rotation_cycles_formats_and_uses_library_in_order():
     history = {"posts": []}
     seen = []
-    for _ in range(34):  # beyond the library (28) into generated content
+    for _ in range(45):  # past the library (14 + 14) into generated content
         it = next_item(history)
         seen.append(it)
         history["posts"].append({"id": it["id"], "hash": it["hash"], "format": it["format"], "status": "posted"})
-    fmts = [i["format"] for i in seen]
-    assert fmts == ["breakdown", "quiz"] * 17
-    assert [i["id"] for i in seen[:28:2]] == [f"b{n:02d}" for n in range(1, 15)]
-    assert [i["id"] for i in seen[1:28:2]] == [f"q{n:02d}" for n in range(1, 15)]
-    assert all(i["id"].startswith("gen-") for i in seen[28:])
+    assert [i["format"] for i in seen] == ["breakdown", "quiz", "allin"] * 15
+    assert [i["id"] for i in seen if i["format"] == "breakdown"][:14] == [f"b{n:02d}" for n in range(1, 15)]
+    assert [i["id"] for i in seen if i["format"] == "quiz"][:14] == [f"q{n:02d}" for n in range(1, 15)]
+    assert all(i["id"].startswith("gen-allin-") for i in seen if i["format"] == "allin")
     assert len({i["hash"] for i in seen}) == len(seen)  # never repeats
 
 

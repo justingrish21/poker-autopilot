@@ -95,9 +95,10 @@ def fit_text(text: str, font_name: str, size: int, max_w: float, max_lines: int,
 
 def text_sprite(text: str, size: int, color=WHITE, font_name: str = "bold", max_w: float = SAFE_W,
                 max_lines: int = 3, align: str = "center", stroke: int | None = None,
-                shadow: bool = True, line_spacing: float = 1.12, colors: dict | None = None) -> Image.Image:
+                shadow: bool = True, line_spacing: float = 1.12, colors: dict | None = None,
+                min_size: int = 28) -> Image.Image:
     """Render text (auto-wrapped/shrunk) with a dark outline + soft shadow into an RGBA sprite."""
-    f, fs, lines, size = fit_text(text, font_name, size, max_w, max_lines)
+    f, fs, lines, size = fit_text(text, font_name, size, max_w, max_lines, min_size=min_size)
     stroke = max(3, size // 14) if stroke is None else stroke
     asc, desc = f.getmetrics()
     lh = int(size * line_spacing)

@@ -565,6 +565,9 @@ def encode(tl: Timeline, out_path: Path, music: Path | None, music_gain_db: floa
 def build_timeline(item: dict, handle: str | None = None) -> Timeline:
     _alpha_lut.clear()  # caches are keyed by id(); never reuse them across videos
     _scaled.clear()
+    if item["format"] == "allin":
+        from .allin import build_allin
+        return build_allin(item, handle)
     return build_breakdown(item, handle) if item["format"] == "breakdown" else build_quiz(item, handle)
 
 

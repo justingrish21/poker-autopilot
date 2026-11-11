@@ -19,6 +19,7 @@ It costs nothing to run besides your Post for Me plan. GitHub Actions is free fo
 |---|---|---|
 | **Hand breakdown** | 22 s | hook → table, cards slide/flip in → "What's the play?" → **THE PLAY** banner (flash + chip confetti) → 3 reasons → end card |
 | **Quiz** | 18 s | hook → question, cards, A/B/C answers → 3-2-1 "Comment your answer" → correct answer glows green (flash + confetti), explanation → end card |
+| **All-in story** | 22-24 s | looks like a hand in a mobile poker app: PokerPilot vs randomly named players, cards dealt, betting, all in, live equity %, the board runs out, the river sweat → end card. Three kinds: **bad beat** (PokerPilot loses as a big favorite), **suckout** (PokerPilot hits a miracle river), **cooler** (set over set and friends; PokerPilot ships it). Every % and out count is computed. |
 
 * Dark background, green felt table, real-looking cards, big outlined text.
 * Everything important stays inside TikTok's safe zone: nothing in the top 150 px, the bottom 350 px or the right 140 px.
@@ -27,6 +28,7 @@ It costs nothing to run besides your Post for Me plan. GitHub Actions is free fo
 
 ## Content never runs out
 
+* Formats rotate breakdown → quiz → all-in story until the learner has data, then it picks the mix.
 * `content/library.json` holds your 14 breakdowns and 14 quizzes. They're used first, in order.
 * After that, `content/generators.py` creates unlimited new, mathematically verified content:
   pot odds, outs (counted by enumerating the deck), Rule of 2 and 4 (with the exact %),
@@ -47,7 +49,7 @@ The goal is club sign-ups, so every run:
 3. **Adjusts automatically** using Thompson sampling (a standard "test and shift" method). After 6 judged
    videos it starts favoring what scores best while still testing alternatives:
    * **Format:** breakdown vs quiz. It never posts the same format 3 times in a row.
-   * **Content type:** pot odds, outs, equity, combos, call-or-fold draws. This kicks in once the starter library is used up.
+   * **Content type:** pot odds, outs, equity, combos, call-or-fold draws, and bad beat vs suckout vs cooler.
    * **Hook tag** on the opening screen ("POKER QUIZ", "WHAT WOULD YOU DO?"...).
    * **Caption call-to-action.**
 4. **Writes `state/performance.md`:** a plain-English report of what's winning, plus the top and weakest videos with links.
@@ -144,6 +146,8 @@ The tests brute-force check every generator's math, the hand evaluator, every li
 main.py                 pick -> render -> upload -> post -> record
 content/library.json    your starter library (14 breakdowns + 14 quizzes)
 content/generators.py   unlimited verified quizzes/breakdowns
+content/allin.py        all-in stories: bad beats, suckouts, coolers (verified odds)
+render/allin.py         the poker-app style table for all-in stories
 content/cards.py        card notation + hand evaluator
 content/equity.py       outs, equity (exact + Monte Carlo), pot odds
 content/rotation.py     alternating formats, library first, never repeat, history.json

@@ -18,6 +18,12 @@ BREAKDOWN_CTAS = [
     "Send this to the friend who always calls.",
     "Think you'd play it better? Come prove it.",
 ]
+ALLIN_CTAS = [
+    "Would you have called? Be honest.",
+    "Tag the friend who always gets lucky on the river.",
+    "Lucky or good? Tell me below.",
+    "Think you'd run better? Come prove it.",
+]
 MAX_LEN = 2000
 
 
@@ -37,7 +43,7 @@ def hashtags_for(index: int, count: int = 5) -> list[str]:
 
 
 def cta_options(fmt: str) -> list[str]:
-    return QUIZ_CTAS if fmt == "quiz" else BREAKDOWN_CTAS
+    return {"quiz": QUIZ_CTAS, "allin": ALLIN_CTAS}.get(fmt, BREAKDOWN_CTAS)
 
 
 def build_caption(item: dict, index: int, cta: str | None = None) -> str:
