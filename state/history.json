@@ -62,7 +62,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-12T22:49:05+00:00",
+      "metrics_at": "2026-11-13T07:04:57+00:00",
       "club_score": 0.98
     },
     {
@@ -127,7 +127,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-12T22:49:05+00:00",
+      "metrics_at": "2026-11-13T07:04:57+00:00",
       "club_score": 0.24
     },
     {
@@ -192,7 +192,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-12T22:49:05+00:00",
+      "metrics_at": "2026-11-13T07:04:57+00:00",
       "club_score": 0.0
     },
     {
@@ -232,7 +232,72 @@
       "url": "https://www.instagram.com/reel/DfqK0RnnNf5/",
       "error": "tiktok: \"TikTok publication could not be confirmed. Status: FAILED. Fail reason: spam_risk_user_banned_from_posting\"",
       "updated_at": "2026-11-12T22:51:44+00:00",
-      "posted_at": "2026-11-12T22:51:44+00:00"
+      "posted_at": "2026-11-12T22:51:44+00:00",
+      "metrics_by_platform": {
+        "instagram": {
+          "views": 0.0,
+          "likes": 0.0,
+          "comments": 0.0,
+          "shares": 0.0,
+          "saves": 0.0,
+          "profile_views": null,
+          "follows": null,
+          "link_clicks": null,
+          "full_watch_rate": null,
+          "avg_watch_s": null
+        }
+      },
+      "urls": {
+        "instagram": "https://www.instagram.com/reel/DfqK0RnnNf5/"
+      },
+      "metrics": {
+        "views": 0.0,
+        "likes": 0.0,
+        "comments": 0.0,
+        "shares": 0.0,
+        "saves": 0.0
+      },
+      "metrics_at": "2026-11-13T07:04:57+00:00",
+      "club_score": 0.0
+    },
+    {
+      "id": "q03",
+      "hash": "5af436903d35ecb5",
+      "format": "quiz",
+      "kind": "library",
+      "title": "Villain checks to you. Best move?",
+      "created_at": "2026-11-13T07:05:13+00:00",
+      "external_id": "pa-q03-5af436903d35ecb5-4",
+      "music": null,
+      "features": {
+        "format": "quiz",
+        "kind": "library",
+        "tag": "QUICK QUIZ",
+        "cta": "Drop your answer in the comments before the reveal.",
+        "slot": "evening",
+        "music": "generated beat",
+        "hook": "Can you get this right?"
+      },
+      "post_id": "sp_R4g0ChHvyQ1n6Kj1puXTI",
+      "platforms": {
+        "tiktok": {
+          "state": "failed",
+          "url": null,
+          "platform_id": null,
+          "error": "\"TikTok publication could not be confirmed. Status: FAILED. Fail reason: spam_risk_user_banned_from_posting\""
+        },
+        "instagram": {
+          "state": "posted",
+          "url": "https://www.instagram.com/reel/DfrDhMxjMEe/",
+          "platform_id": "18118578215588682",
+          "error": null
+        }
+      },
+      "status": "posted",
+      "url": "https://www.instagram.com/reel/DfrDhMxjMEe/",
+      "error": "tiktok: \"TikTok publication could not be confirmed. Status: FAILED. Fail reason: spam_risk_user_banned_from_posting\"",
+      "updated_at": "2026-11-13T07:06:48+00:00",
+      "posted_at": "2026-11-13T07:06:48+00:00"
     }
   ]
 }
