@@ -62,7 +62,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-15T06:59:52+00:00",
+      "metrics_at": "2026-11-15T21:57:26+00:00",
       "club_score": 0.98
     },
     {
@@ -127,7 +127,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-15T06:59:52+00:00",
+      "metrics_at": "2026-11-15T21:57:26+00:00",
       "club_score": 0.24
     },
     {
@@ -192,7 +192,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-15T06:59:52+00:00",
+      "metrics_at": "2026-11-15T21:57:26+00:00",
       "club_score": 0.02
     },
     {
@@ -257,7 +257,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-15T06:59:52+00:00",
+      "metrics_at": "2026-11-15T21:57:26+00:00",
       "club_score": 0.02
     },
     {
@@ -322,7 +322,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-15T06:59:52+00:00",
+      "metrics_at": "2026-11-15T21:57:26+00:00",
       "club_score": 0.02
     },
     {
@@ -387,7 +387,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-15T06:59:52+00:00",
+      "metrics_at": "2026-11-15T21:57:26+00:00",
       "club_score": 0.78
     },
     {
@@ -452,7 +452,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-15T06:59:52+00:00",
+      "metrics_at": "2026-11-15T21:57:26+00:00",
       "club_score": 2.04
     },
     {
@@ -517,7 +517,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-15T06:59:52+00:00",
+      "metrics_at": "2026-11-15T21:57:26+00:00",
       "club_score": 2.34
     },
     {
@@ -557,7 +557,72 @@
       "url": "https://www.tiktok.com/@pokerpilot08",
       "error": null,
       "updated_at": "2026-11-15T07:01:01+00:00",
-      "posted_at": "2026-11-15T07:01:01+00:00"
+      "posted_at": "2026-11-15T07:01:01+00:00",
+      "metrics_by_platform": {
+        "instagram": {
+          "views": 2.0,
+          "likes": 0.0,
+          "comments": 0.0,
+          "shares": 0.0,
+          "saves": 0.0,
+          "profile_views": null,
+          "follows": null,
+          "link_clicks": null,
+          "full_watch_rate": null,
+          "avg_watch_s": null
+        }
+      },
+      "urls": {
+        "instagram": "https://www.instagram.com/reel/DfwMddxEc6x/"
+      },
+      "metrics": {
+        "views": 2.0,
+        "likes": 0.0,
+        "comments": 0.0,
+        "shares": 0.0,
+        "saves": 0.0
+      },
+      "metrics_at": "2026-11-15T21:57:26+00:00",
+      "club_score": 0.04
+    },
+    {
+      "id": "gen-allin-00004",
+      "hash": "1a072c0df9861842",
+      "format": "allin",
+      "kind": "suckout",
+      "title": null,
+      "created_at": "2026-11-15T21:57:44+00:00",
+      "external_id": "pa-gen-allin-00004-1a072c0df9861842-9",
+      "music": null,
+      "features": {
+        "format": "allin",
+        "kind": "suckout",
+        "tag": "none",
+        "cta": "Tag the friend who always gets lucky on the river.",
+        "slot": "midday",
+        "music": "generated beat",
+        "hook": "I needed a miracle on the river..."
+      },
+      "post_id": "sp_NAE4F7NOe3EWKK3JQLW",
+      "platforms": {
+        "tiktok": {
+          "state": "failed",
+          "url": null,
+          "platform_id": null,
+          "error": "\"TikTok publication could not be confirmed. Status: FAILED. Fail reason: spam_risk_user_banned_from_posting\""
+        },
+        "instagram": {
+          "state": "posted",
+          "url": "https://www.instagram.com/reel/DfxzMPDjX8d/",
+          "platform_id": "18118819955281254",
+          "error": null
+        }
+      },
+      "status": "posted",
+      "url": "https://www.instagram.com/reel/DfxzMPDjX8d/",
+      "error": "tiktok: \"TikTok publication could not be confirmed. Status: FAILED. Fail reason: spam_risk_user_banned_from_posting\"",
+      "updated_at": "2026-11-15T21:58:46+00:00",
+      "posted_at": "2026-11-15T21:58:46+00:00"
     }
   ]
 }
