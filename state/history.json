@@ -62,7 +62,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-18T07:50:47+00:00",
+      "metrics_at": "2026-11-18T23:29:09+00:00",
       "club_score": 1.02
     },
     {
@@ -127,7 +127,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-18T07:50:47+00:00",
+      "metrics_at": "2026-11-18T23:29:09+00:00",
       "club_score": 0.3
     },
     {
@@ -192,7 +192,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-18T07:50:47+00:00",
+      "metrics_at": "2026-11-18T23:29:09+00:00",
       "club_score": 0.04
     },
     {
@@ -257,7 +257,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-18T07:50:47+00:00",
+      "metrics_at": "2026-11-18T23:29:09+00:00",
       "club_score": 0.06
     },
     {
@@ -322,7 +322,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-18T07:50:47+00:00",
+      "metrics_at": "2026-11-18T23:29:09+00:00",
       "club_score": 0.04
     },
     {
@@ -387,7 +387,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-18T07:50:47+00:00",
+      "metrics_at": "2026-11-18T23:29:09+00:00",
       "club_score": 0.82
     },
     {
@@ -452,7 +452,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-18T07:50:47+00:00",
+      "metrics_at": "2026-11-18T23:29:09+00:00",
       "club_score": 2.08
     },
     {
@@ -517,7 +517,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-18T07:50:47+00:00",
+      "metrics_at": "2026-11-18T23:29:09+00:00",
       "club_score": 2.38
     },
     {
@@ -582,7 +582,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-18T07:50:47+00:00",
+      "metrics_at": "2026-11-18T23:29:09+00:00",
       "club_score": 0.06
     },
     {
@@ -647,7 +647,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-18T07:50:47+00:00",
+      "metrics_at": "2026-11-18T23:29:09+00:00",
       "club_score": 1.18
     },
     {
@@ -712,7 +712,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-18T07:50:47+00:00",
+      "metrics_at": "2026-11-18T23:29:09+00:00",
       "club_score": 2.32
     },
     {
@@ -777,7 +777,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-18T07:50:47+00:00",
+      "metrics_at": "2026-11-18T23:29:09+00:00",
       "club_score": 0.68
     },
     {
@@ -842,7 +842,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-18T07:50:47+00:00",
+      "metrics_at": "2026-11-18T23:29:09+00:00",
       "club_score": 3.36
     },
     {
@@ -907,7 +907,7 @@
         "shares": 0.0,
         "saves": 0.0
       },
-      "metrics_at": "2026-11-18T07:50:47+00:00",
+      "metrics_at": "2026-11-18T23:29:09+00:00",
       "club_score": 3.24
     },
     {
@@ -947,7 +947,72 @@
       "url": "https://www.tiktok.com/@pokerpilot08",
       "error": null,
       "updated_at": "2026-11-18T07:52:35+00:00",
-      "posted_at": "2026-11-18T07:52:35+00:00"
+      "posted_at": "2026-11-18T07:52:35+00:00",
+      "metrics_by_platform": {
+        "instagram": {
+          "views": 0.0,
+          "likes": 0.0,
+          "comments": 0.0,
+          "shares": 0.0,
+          "saves": 0.0,
+          "profile_views": null,
+          "follows": null,
+          "link_clicks": null,
+          "full_watch_rate": null,
+          "avg_watch_s": null
+        }
+      },
+      "urls": {
+        "instagram": "https://www.instagram.com/reel/Df4AwAzHNUe/"
+      },
+      "metrics": {
+        "views": 0.0,
+        "likes": 0.0,
+        "comments": 0.0,
+        "shares": 0.0,
+        "saves": 0.0
+      },
+      "metrics_at": "2026-11-18T23:29:09+00:00",
+      "club_score": 0.0
+    },
+    {
+      "id": "gen-allin-00008",
+      "hash": "13d86da3c2fb40da",
+      "format": "allin",
+      "kind": "cooler",
+      "title": null,
+      "created_at": "2026-11-18T23:29:21+00:00",
+      "external_id": "pa-gen-allin-00008-13d86da3c2fb40da-15",
+      "music": null,
+      "features": {
+        "format": "allin",
+        "kind": "cooler",
+        "tag": "none",
+        "cta": "Would you have called? Be honest.",
+        "slot": "evening",
+        "music": "generated beat",
+        "hook": "I flopped a set. He flopped a set."
+      },
+      "post_id": "sp_pKqaJy802XUSTaTwz5Z7",
+      "platforms": {
+        "tiktok": {
+          "state": "failed",
+          "url": null,
+          "platform_id": null,
+          "error": "\"TikTok API error: Refresh token is invalid or expired.\""
+        },
+        "instagram": {
+          "state": "posted",
+          "url": "https://www.instagram.com/reel/Df5sG5Jgr4l/",
+          "platform_id": "18376901764210460",
+          "error": null
+        }
+      },
+      "status": "posted",
+      "url": "https://www.instagram.com/reel/Df5sG5Jgr4l/",
+      "error": "tiktok: \"TikTok API error: Refresh token is invalid or expired.\"",
+      "updated_at": "2026-11-18T23:30:58+00:00",
+      "posted_at": "2026-11-18T23:30:58+00:00"
     }
   ]
 }
