@@ -1,9 +1,9 @@
 # Performance report
 
-_Updated 2026-11-27 01:05 UTC automatically by the autopilot._
+_Updated 2026-11-27 08:56 UTC automatically by the autopilot._
 
-- Videos posted: **31**
-- Judged so far (older than 48h, with metrics): **27**
+- Videos posted: **32**
+- Judged so far (older than 48h, with metrics): **28**
 - Learning is **ON**
 
 Club-intent score = 0.02 x views + likes + 4 x comments + 6 x shares + 3 x saves + 5 x profile views + 15 x follows + 25 x link clicks (TikTok + Instagram combined).
@@ -12,38 +12,38 @@ Club-intent score = 0.02 x views + likes + 4 x comments + 6 x shares + 3 x saves
 
 | Option | Videos | Avg rank (0-1) | Avg score | Avg views |
 |---|---:|---:|---:|---:|
-| allin | 13 | 0.64 | 1.1 | 45 |
-| quiz | 14 | 0.37 | 0.6 | 25 |
+| allin | 14 | 0.64 | 1.0 | 42 |
+| quiz | 14 | 0.36 | 0.6 | 25 |
 
 ## Content type
 
 | Option | Videos | Avg rank (0-1) | Avg score | Avg views |
 |---|---:|---:|---:|---:|
-| badbeat | 4 | 0.69 | 1.5 | 64 |
-| cooler | 5 | 0.65 | 1.1 | 44 |
-| suckout | 4 | 0.58 | 0.6 | 28 |
-| library | 14 | 0.37 | 0.6 | 25 |
+| cooler | 5 | 0.66 | 1.1 | 44 |
+| badbeat | 5 | 0.65 | 1.2 | 52 |
+| suckout | 4 | 0.59 | 0.6 | 28 |
+| library | 14 | 0.36 | 0.6 | 25 |
 
 ## Hook tag
 
 | Option | Videos | Avg rank (0-1) | Avg score | Avg views |
 |---|---:|---:|---:|---:|
-| none | 13 | 0.64 | 1.1 | 45 |
+| none | 14 | 0.64 | 1.0 | 42 |
 | PRO LEVEL QUIZ | 6 | 0.52 | 1.3 | 49 |
 | POKER QUIZ | 2 | 0.38 | 0.5 | 26 |
-| TEST YOUR GAME | 2 | 0.22 | 0.0 | 2 |
-| QUICK QUIZ | 4 | 0.21 | 0.0 | 2 |
+| TEST YOUR GAME | 2 | 0.21 | 0.0 | 2 |
+| QUICK QUIZ | 4 | 0.20 | 0.0 | 2 |
 
 ## Caption CTA
 
 | Option | Videos | Avg rank (0-1) | Avg score | Avg views |
 |---|---:|---:|---:|---:|
 | Think you'd run better? Come prove it. | 3 | 0.72 | 1.9 | 78 |
-| Lucky or good? Tell me below. | 3 | 0.69 | 1.4 | 53 |
-| Tag the friend who always gets lucky on the river. | 5 | 0.62 | 0.6 | 32 |
-| Would you have called? Be honest. | 2 | 0.52 | 0.4 | 18 |
+| Lucky or good? Tell me below. | 4 | 0.63 | 1.1 | 40 |
+| Tag the friend who always gets lucky on the river. | 5 | 0.63 | 0.6 | 32 |
+| Would you have called? Be honest. | 2 | 0.53 | 0.4 | 18 |
 | Comment A, B or C. No cheating! | 2 | 0.50 | 1.2 | 58 |
-| Tag the friend who always gets this wrong. | 3 | 0.42 | 0.7 | 19 |
+| Tag the friend who always gets this wrong. | 3 | 0.41 | 0.7 | 19 |
 | Drop your answer in the comments before the reveal. | 7 | 0.37 | 0.7 | 25 |
 | Got it right? Come prove it at the tables. | 2 | 0.15 | 0.0 | 1 |
 
@@ -51,15 +51,15 @@ Club-intent score = 0.02 x views + likes + 4 x comments + 6 x shares + 3 x saves
 
 | Option | Videos | Avg rank (0-1) | Avg score | Avg views |
 |---|---:|---:|---:|---:|
-| midday | 4 | 0.72 | 1.2 | 61 |
-| evening | 23 | 0.46 | 0.8 | 30 |
+| midday | 4 | 0.73 | 1.2 | 61 |
+| evening | 24 | 0.46 | 0.8 | 29 |
 
 ## Music
 
 | Option | Videos | Avg rank (0-1) | Avg score | Avg views |
 |---|---:|---:|---:|---:|
-| silent | 2 | 0.62 | 0.7 | 33 |
-| generated beat | 25 | 0.49 | 0.9 | 35 |
+| silent | 2 | 0.63 | 0.7 | 33 |
+| generated beat | 26 | 0.49 | 0.8 | 34 |
 
 ## Top videos
 
